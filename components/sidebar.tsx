@@ -1,0 +1,75 @@
+"use client"
+
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
+import { Search, BarChart3, History, Settings, User } from "lucide-react"
+
+const navigation = [
+  { name: "Search", href: "/", icon: Search },
+  { name: "Leads", href: "/results", icon: BarChart3 },
+  { name: "History", href: "/history", icon: History },
+]
+
+export function Sidebar() {
+  const pathname = usePathname()
+
+  return (
+    <div className="flex h-screen w-64 flex-col bg-sidebar">
+      {/* Logo */}
+      <div className="px-6 py-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 flex items-center justify-center">
+            {/* SVG Logo placeholder - replace with your actual SVG */}
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="28" height="28" rx="4" fill="#000000" />
+              <text x="14" y="18" textAnchor="middle" fill="white" fontSize="12" fontFamily="system-ui">
+                SL
+              </text>
+            </svg>
+          </div>
+        </div>
+        <p className="text-sm text-secondary font-normal">Lead Generator</p>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-4">
+        <ul className="space-y-1">
+          {navigation.map((item) => {
+            const Icon = item.icon
+            const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
+
+            return (
+              <li key={item.name}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex items-center space-x-3 px-4 py-3 text-sm font-normal transition-all duration-200 ease-in-out rounded-none",
+                    isActive ? "bg-black text-white" : "text-secondary hover:bg-gray-200/50 hover:text-primary",
+                  )}
+                >
+                  <Icon className="h-4 w-4 flex-shrink-0" />
+                  <span>{item.name}</span>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </nav>
+
+      {/* User Profile */}
+      <div className="p-4">
+        <div className="flex items-center space-x-3 px-4 py-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 flex-shrink-0">
+            <User className="h-4 w-4 text-purple-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-normal text-primary truncate">John Doe</p>
+            <p className="text-xs text-secondary truncate">john@company.com</p>
+          </div>
+          <Settings className="h-4 w-4 text-secondary flex-shrink-0" />
+        </div>
+      </div>
+    </div>
+  )
+}
