@@ -9,25 +9,6 @@ import type {
   CompetitorAnalysis,
 } from "./types"
 
-export const mockTrendData: SearchTrendData = {
-  searchVolume: 12500,
-  trend: "increasing",
-  seasonality: "Higher demand in Q4 (holiday season)",
-  competitionLevel: "medium",
-}
-
-export const mockCompetitorAnalysis: CompetitorAnalysis = {
-  totalCompetitors: 47,
-  topCompetitors: [
-    { name: "Sweet Treats Bakery", ranking: 1, hasWebsite: true, estimatedTraffic: "2.5K/month" },
-    { name: "Corner Bakehouse", ranking: 2, hasWebsite: false },
-    { name: "Artisan Bread Co", ranking: 3, hasWebsite: true, estimatedTraffic: "1.8K/month" },
-    { name: "Daily Bread Bakery", ranking: 4, hasWebsite: true, estimatedTraffic: "950/month" },
-    { name: "Fresh Start Bakery", ranking: 5, hasWebsite: false },
-  ],
-  marketSaturation: "medium",
-}
-
 export const businessTypes: BusinessType[] = [
   { id: "bakery", name: "Bakery", category: "Food & Beverage" },
   { id: "dentist", name: "Dentist", category: "Healthcare" },
@@ -1403,14 +1384,10 @@ export const mockSearchResults: SearchResult[] = [
       numberOfBusinesses: 50,
       includeGoogleSearch: true,
       customSearchQuery: "artisan bakery atlanta",
-      includeCompetitorAnalysis: true,
-      includeTrendAnalysis: true,
     },
     leads: mockLeads,
     date: "2024-01-15",
     totalLeads: mockLeads.length,
-    trendData: mockTrendData,
-    competitorAnalysis: mockCompetitorAnalysis,
   },
   {
     id: "2",
@@ -1419,8 +1396,6 @@ export const mockSearchResults: SearchResult[] = [
       locations: ["chicago", "denver"],
       numberOfBusinesses: 25,
       includeGoogleSearch: false,
-      includeCompetitorAnalysis: false,
-      includeTrendAnalysis: false,
     },
     leads: mockLeads.slice(0, 15),
     date: "2024-01-10",

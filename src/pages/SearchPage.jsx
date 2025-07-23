@@ -1,5 +1,5 @@
 "use client"
-
+import axios from "axios"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/Button"
@@ -20,12 +20,10 @@ const SearchPage = () => {
   const [includeGoogleSearch, setIncludeGoogleSearch] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [customSearchQuery, setCustomSearchQuery] = useState("")
-  const [includeCompetitorAnalysis, setIncludeCompetitorAnalysis] = useState(false)
-  const [includeTrendAnalysis, setIncludeTrendAnalysis] = useState(false)
 
   const handleSearch = async () => {
     if (!selectedBusinessType || selectedCities.length === 0) {
-      return
+      
     }
 
     setIsSearching(true)
@@ -37,8 +35,6 @@ const SearchPage = () => {
       numberOfBusinesses,
       includeGoogleSearch,
       customSearchQuery: customSearchQuery.trim() || undefined,
-      includeCompetitorAnalysis,
-      includeTrendAnalysis,
     }
 
     // Simulate API call
@@ -229,31 +225,6 @@ const SearchPage = () => {
                       <Label htmlFor="includeGoogleSearch" className="text-primary font-normal text-sm cursor-pointer">
                         Include Google Search results - Also crawl businesses that may not be under the business type
                         according to Google Maps, but are present in Google Search results
-                      </Label>
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                      <Checkbox
-                        id="includeCompetitorAnalysis"
-                        checked={includeCompetitorAnalysis}
-                        onCheckedChange={setIncludeCompetitorAnalysis}
-                      />
-                      <Label
-                        htmlFor="includeCompetitorAnalysis"
-                        className="text-primary font-normal text-sm cursor-pointer"
-                      >
-                        Include competitor analysis - Analyze market saturation and top competing businesses
-                      </Label>
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                      <Checkbox
-                        id="includeTrendAnalysis"
-                        checked={includeTrendAnalysis}
-                        onCheckedChange={setIncludeTrendAnalysis}
-                      />
-                      <Label htmlFor="includeTrendAnalysis" className="text-primary font-normal text-sm cursor-pointer">
-                        Include search trend insights - Get search volume data and market trends
                       </Label>
                     </div>
                   </div>

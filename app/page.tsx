@@ -42,8 +42,6 @@ export default function SearchPage() {
   const [searchResults, setSearchResults] = useState<Lead[]>([])
   const [hasSearched, setHasSearched] = useState(false)
   const [customSearchQuery, setCustomSearchQuery] = useState("")
-  const [includeCompetitorAnalysis, setIncludeCompetitorAnalysis] = useState(false)
-  const [includeTrendAnalysis, setIncludeTrendAnalysis] = useState(false)
   const [currentSearchId, setCurrentSearchId] = useState<string | null>(null)
 
   const filteredCities = cities.filter(
@@ -67,8 +65,6 @@ export default function SearchPage() {
       numberOfBusinesses,
       includeGoogleSearch,
       customSearchQuery: customSearchQuery.trim() || undefined,
-      includeCompetitorAnalysis,
-      includeTrendAnalysis,
     }
 
     // Simulate API call
@@ -602,32 +598,6 @@ export default function SearchPage() {
                       </Label>
                     </div>
 
-                    <div className="flex items-center space-x-3">
-                      <Checkbox
-                        id="includeCompetitorAnalysis"
-                        checked={includeCompetitorAnalysis}
-                        onCheckedChange={setIncludeCompetitorAnalysis}
-                        className="border-gray-300"
-                      />
-                      <Label
-                        htmlFor="includeCompetitorAnalysis"
-                        className="text-primary font-normal text-sm cursor-pointer"
-                      >
-                        Include competitor analysis - Analyze market saturation and top competing businesses
-                      </Label>
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                      <Checkbox
-                        id="includeTrendAnalysis"
-                        checked={includeTrendAnalysis}
-                        onCheckedChange={setIncludeTrendAnalysis}
-                        className="border-gray-300"
-                      />
-                      <Label htmlFor="includeTrendAnalysis" className="text-primary font-normal text-sm cursor-pointer">
-                        Include search trend insights - Get search volume data and market trends
-                      </Label>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -696,95 +666,6 @@ export default function SearchPage() {
                 </CardContent>
               </Card>
             </div>
-
-            {/* Trend Analysis & Competitor Insights */}
-            {(includeTrendAnalysis || includeCompetitorAnalysis) && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                {/* Search Trend Insights */}
-                {includeTrendAnalysis && (
-                  <Card className="border-0 shadow-none bg-card">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                          <TrendingUp className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-medium text-primary">Search Trends</h3>
-                          <p className="text-sm text-secondary">Market insights for {businessTypeName}</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                          <span className="text-secondary">Monthly Search Volume</span>
-                          <span className="font-medium text-primary">12,500</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-secondary">Trend Direction</span>
-                          <Badge className="bg-green-100 text-green-800">Increasing</Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-secondary">Competition Level</span>
-                          <Badge className="bg-yellow-100 text-yellow-800">Medium</Badge>
-                        </div>
-                        <div className="pt-2 border-t">
-                          <p className="text-xs text-secondary">
-                            <strong>Seasonality:</strong> Higher demand in Q4 (holiday season)
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Competitor Analysis */}
-                {includeCompetitorAnalysis && (
-                  <Card className="border-0 shadow-none bg-card">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-                          <Users className="h-5 w-5 text-purple-600" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-medium text-primary">Market Analysis</h3>
-                          <p className="text-sm text-secondary">Competitive landscape overview</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                          <span className="text-secondary">Total Competitors</span>
-                          <span className="font-medium text-primary">47</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-secondary">Market Saturation</span>
-                          <Badge className="bg-yellow-100 text-yellow-800">Medium</Badge>
-                        </div>
-                        <div className="pt-2 border-t">
-                          <p className="text-xs text-secondary mb-2">
-                            <strong>Top Competitors:</strong>
-                          </p>
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-xs">
-                              <span className="text-secondary">1. Sweet Treats Bakery</span>
-                              <span className="text-primary">2.5K/month</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-secondary">2. Corner Bakehouse</span>
-                              <span className="text-red-600">No website</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-secondary">3. Artisan Bread Co</span>
-                              <span className="text-primary">1.8K/month</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            )}
 
             {/* Results Grid */}
             <div className="space-y-6">

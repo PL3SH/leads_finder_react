@@ -73,8 +73,6 @@ export interface SearchParams {
   numberOfBusinesses: number
   includeGoogleSearch: boolean
   customSearchQuery?: string
-  includeCompetitorAnalysis: boolean
-  includeTrendAnalysis: boolean
 }
 
 export interface SearchResult {
@@ -83,8 +81,6 @@ export interface SearchResult {
   leads: Lead[]
   date: string
   totalLeads: number
-  trendData?: SearchTrendData
-  competitorAnalysis?: CompetitorAnalysis
 }
 
 export type LeadType = {

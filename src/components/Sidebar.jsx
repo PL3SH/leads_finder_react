@@ -17,7 +17,7 @@ const Sidebar = () => {
       <div className="px-6 py-8">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-8 h-8 flex items-center justify-center">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="30" height="30" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="28" height="28" rx="4" fill="#000000" />
               <text x="14" y="18" textAnchor="middle" fill="white" fontSize="12" fontFamily="system-ui">
                 SL
@@ -53,20 +53,6 @@ const Sidebar = () => {
           })}
         </ul>
       </nav>
-
-      {/* User Profile */}
-      <div className="p-4">
-        <div className="flex items-center space-x-3 px-4 py-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 flex-shrink-0">
-            <User className="h-4 w-4 text-purple-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-normal text-primary truncate">John Doe</p>
-            <p className="text-xs text-secondary truncate">john@company.com</p>
-          </div>
-          <Settings className="h-4 w-4 text-secondary flex-shrink-0" />
-        </div>
-      </div>
     </div>
   )
 }

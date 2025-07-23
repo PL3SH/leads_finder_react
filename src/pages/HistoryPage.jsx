@@ -171,16 +171,6 @@ const HistoryPage = () => {
                                 Custom Query: {search.searchParams.customSearchQuery}
                               </Badge>
                             )}
-                            {search.searchParams.includeCompetitorAnalysis && (
-                              <Badge className="bg-green-100 text-green-800 px-3 py-1 font-normal rounded-none">
-                                Competitor Analysis
-                              </Badge>
-                            )}
-                            {search.searchParams.includeTrendAnalysis && (
-                              <Badge className="bg-yellow-100 text-yellow-800 px-3 py-1 font-normal rounded-none">
-                                Trend Analysis
-                              </Badge>
-                            )}
                           </div>
                         </div>
 
