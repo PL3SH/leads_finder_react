@@ -25,10 +25,11 @@ import {
   MapPin,
 } from "lucide-react"
 import { mockTableLeads, leadTypes } from "@/lib/data"
+import { getAllLeads } from "@/services/get_leads"
 
 const LeadsPage = () => {
-  const [leads, setLeads] = useState(mockTableLeads)
-  const [filteredLeads, setFilteredLeads] = useState(mockTableLeads)
+  const [leads, setLeads] = useState([]) // Replace with real data fetching logic
+  const [filteredLeads, setFilteredLeads] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const [filterByType, setFilterByType] = useState("all")
   const [filterByCategory, setFilterByCategory] = useState("all")
@@ -36,9 +37,15 @@ const LeadsPage = () => {
   const [sortBy, setSortBy] = useState("dateAdded")
   const [sortOrder, setSortOrder] = useState("desc")
   const [viewMode, setViewMode] = useState("table")
+  
+
+  useEffect(() => {
+    getAllLeads().then(setLeads)
+    getAllLeads().then(setFilteredLeads)
+  }, [])
 
   // Get unique categories for filters
-  const uniqueCategories = Array.from(new Set(leads.map((lead) => lead.category)))
+  const uniqueCategories = []
 
   useEffect(() => {
     let filtered = leads

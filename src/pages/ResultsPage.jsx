@@ -10,11 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Phone, Mail, Globe, MapPin, Star, Download, Eye, Filter, Search, LayoutGrid, List } from "lucide-react"
 import { mockLeads, leadTypes, businessTypes, cities } from "@/lib/data"
 import { searchStorage } from "@/lib/storage"
+import { getAllLeads } from "@/services/get_leads"
 
 const ResultsPage = () => {
   const [searchParams] = useSearchParams()
-  const [leads, setLeads] = useState(mockLeads)
-  const [filteredLeads, setFilteredLeads] = useState(mockLeads)
+  const [leads, setLeads] = useState(getAllLeads())
+  const [filteredLeads, setFilteredLeads] = useState(getAllLeads())
   const [sortBy, setSortBy] = useState("leadScore")
   const [sortOrder, setSortOrder] = useState("desc")
   const [filterByType, setFilterByType] = useState("all")

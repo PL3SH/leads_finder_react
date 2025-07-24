@@ -1,6 +1,6 @@
 "use client"
-import axios from "axios"
-import { useState } from "react"
+import api from "@/services/api"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
@@ -9,100 +9,56 @@ import { Checkbox } from "@/components/ui/Checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import { Card, CardContent } from "@/components/ui/Card"
 import { Search, MapPin, Building2, Hash, Target } from "lucide-react"
-import { businessTypes, cities } from "@/lib/data"
+import { getBusinessCategories } from "@/services/business_categories"
+import { getCities } from "@/services/cities"
 import { searchStorage } from "@/lib/storage"
+import { set } from "date-fns/set"
 
 const SearchPage = () => {
   const navigate = useNavigate()
-  const [selectedBusinessType, setSelectedBusinessType] = useState("")
+  const [selectedBusinessCategories, setSelectedBusinessCategories] = useState([])
   const [selectedCities, setSelectedCities] = useState([])
   const [numberOfBusinesses, setNumberOfBusinesses] = useState(50)
   const [includeGoogleSearch, setIncludeGoogleSearch] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [customSearchQuery, setCustomSearchQuery] = useState("")
 
+  const [cities, setCities] = useState([])
+  const [businessCategories, setBusinessCategories] = useState([])
+
+  useEffect(() => {
+    getCities().then(setCities)
+  }, [])
+
+  useEffect(() => {
+    getBusinessCategories().then(setBusinessCategories)
+  }, [])
+  const businessCategoryName = businessCategories.find((bc) => bc.id === selectedBusinessCategories[0])?.name || "Select business type"
+  const selectedCityName = cities.find(city => city.location_id === selectedCities[0])?.formatted_name || "Select location";
+
   const handleSearch = async () => {
-    if (!selectedBusinessType || selectedCities.length === 0) {
-      
-    }
 
     setIsSearching(true)
 
     // Create search parameters
     const searchParams = {
-      businessType: selectedBusinessType,
-      locations: selectedCities,
-      numberOfBusinesses,
-      includeGoogleSearch,
-      customSearchQuery: customSearchQuery.trim() || undefined,
+      location_id: selectedCities[0],
+      max_results: numberOfBusinesses,
+      query: customSearchQuery.trim(),
+      search_google: includeGoogleSearch,
+      search_local: false,
+      search_maps: true,
     }
+    const response = await api.post("/search/execute", searchParams)
+    
+    console.log('Response:  ' , response)
+    setTimeout(() => {
+      setIsSearching(false)
+    }, 3000)
+    return
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    // Generate mock results
-    const businessTypeName = businessTypes.find((bt) => bt.id === selectedBusinessType)?.name || selectedBusinessType
-    const selectedCityName = cities.find((city) => city.id === selectedCities[0])?.name || "Atlanta"
-    const selectedState = cities.find((city) => city.id === selectedCities[0])?.state || "GA"
-
-    const results = generateLeadsForBusinessType(
-      selectedBusinessType,
-      selectedCityName,
-      selectedState,
-      numberOfBusinesses,
-    )
-
-    // Save the search result to storage
-    const savedSearch = searchStorage.saveSearchResult(searchParams, results)
-
-    setIsSearching(false)
-
-    // Navigate to results page with the search ID
-    const params = new URLSearchParams({
-      searchId: savedSearch.id,
-      businessType: selectedBusinessType,
-      locations: selectedCities.join(","),
-      numberOfBusinesses: numberOfBusinesses.toString(),
-    })
-    navigate(`/results?${params.toString()}`)
   }
 
-  const generateLeadsForBusinessType = (businessType, cityName, state, count = 8) => {
-    // Mock lead generation logic
-    const baseLeads = [
-      {
-        id: "1",
-        businessName: `${cityName} ${businessTypes.find((bt) => bt.id === businessType)?.name || "Business"}`,
-        category: businessTypes.find((bt) => bt.id === businessType)?.name || "Business",
-        phone: "(555) 123-4567",
-        email: "info@business.com",
-        address: `123 Main St, ${cityName}, ${state} 30309`,
-        leadScore: 95,
-        leadType: "excellent",
-        source: "google-maps",
-        googleMapsListing: true,
-      },
-      {
-        id: "2",
-        businessName: `Premium ${businessTypes.find((bt) => bt.id === businessType)?.name || "Business"}`,
-        category: businessTypes.find((bt) => bt.id === businessType)?.name || "Business",
-        website: "https://premium-business.com",
-        phone: "(555) 987-6543",
-        address: `456 Oak Ave, ${cityName}, ${state} 30308`,
-        lighthouseScore: 35,
-        leadScore: 82,
-        leadType: "good",
-        source: "both",
-        googleMapsListing: true,
-        googleSearchRanking: 3,
-      },
-    ]
-
-    return baseLeads.slice(0, Math.min(count, numberOfBusinesses))
-  }
-
-  const selectedCityNames = selectedCities.map((id) => cities.find((city) => city.id === id)?.name).filter(Boolean)
-  const businessTypeName = businessTypes.find((bt) => bt.id === selectedBusinessType)?.name || selectedBusinessType
 
   return (
     <div className="min-h-screen bg-main">
@@ -140,14 +96,14 @@ const SearchPage = () => {
                     <Building2 className="h-4 w-4" />
                     Business Type
                   </Label>
-                  <Select value={selectedBusinessType} onValueChange={setSelectedBusinessType}>
+                  <Select value={selectedBusinessCategories[0] || ""} onValueChange={(value) => setSelectedBusinessCategories([value])}>
                     <SelectTrigger className="h-12 bg-card border-gray-300 font-normal text-primary">
-                      <SelectValue placeholder="Select business type" />
+                      <SelectValue placeholder={businessCategoryName} />
                     </SelectTrigger>
                     <SelectContent className="bg-card">
-                      {businessTypes.map((type) => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
+                      {businessCategories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -162,12 +118,12 @@ const SearchPage = () => {
                   </Label>
                   <Select value={selectedCities[0] || ""} onValueChange={(value) => setSelectedCities([value])}>
                     <SelectTrigger className="h-12 bg-card border-gray-300 font-normal text-primary">
-                      <SelectValue placeholder="Select location" />
+                      <SelectValue placeholder={selectedCityName}/>
                     </SelectTrigger>
                     <SelectContent className="bg-card">
                       {cities.map((city) => (
-                        <SelectItem key={city.id} value={city.id}>
-                          {city.name}, {city.state}
+                        <SelectItem key={city.location_id} value={city.location_id}>
+                          {city.formatted_name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -235,7 +191,7 @@ const SearchPage = () => {
               <div className="flex justify-end">
                 <Button
                   onClick={handleSearch}
-                  disabled={!selectedBusinessType || selectedCities.length === 0 || isSearching}
+                  disabled={!selectedBusinessCategories[0] || !selectedCities[0] || isSearching}
                   className="bg-black hover:bg-gray-800 text-white font-normal h-12 px-6 rounded-none"
                 >
                   {isSearching ? (
