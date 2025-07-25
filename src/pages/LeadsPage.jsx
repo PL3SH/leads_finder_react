@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Card, CardContent } from "@/components/ui/Card"
 import { Badge } from "@/components/ui/Badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
 import {
   Eye,
@@ -27,6 +27,7 @@ import {
 import { mockTableLeads, leadTypes } from "@/lib/data"
 import { getAllLeads } from "@/services/get_leads"
 import { getBusinessCategories } from "@/services/business_categories"
+import { getLocations } from "@/services/locations"
 
 const LeadsPage = () => {
   const [leads, setLeads] = useState([]) // Keep for possible future use
@@ -34,22 +35,29 @@ const LeadsPage = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterByType, setFilterByType] = useState("all")
   const [filterByCategory, setFilterByCategory] = useState("all")
+  const [filterByLocation, setFilterByLocation] = useState("all")
   const [filterByZoho, setFilterByZoho] = useState("all")
   const [sortBy, setSortBy] = useState("dateAdded")
   const [sortOrder, setSortOrder] = useState("desc")
   const [viewMode, setViewMode] = useState("table")
   const [businessCategories, setBusinessCategories] = useState([])
+  const [locations, setLocations] = useState([])
   const [page, setPage] = useState(1)
   const leadsPerPage = 50
 
   useEffect(() => {
     getBusinessCategories().then(setBusinessCategories)
+    getLocations().then(setLocations)
   }, [])
 
   // Helper: Map category name to ID
   const getCategoryIdByName = (name) => {
     const cat = businessCategories.find((bc) => bc.name === name)
     return cat ? cat.id : undefined
+  }
+  const getLocationIdByName = (name) => {
+    const loc = locations.find((l) => l.name === name)
+    return loc ? loc.id : undefined
   }
 
   // Helper: Map sort UI to API
@@ -64,7 +72,7 @@ const LeadsPage = () => {
   }
 
   // Build API params from UI state
-  const buildApiParams = () => {
+  const buildApiParams = useCallback(() => {
     const params = {
       skip: (page - 1) * leadsPerPage,
       limit: leadsPerPage,
@@ -76,18 +84,26 @@ const LeadsPage = () => {
       const catId = getCategoryIdByName(filterByCategory)
       if (catId) params.category_id = catId
     }
+    if (filterByLocation !== "all") {
+      const locId = getLocationIdByName(filterByLocation)
+      if (locId) params.location_id = locId
+    }
     if (filterByZoho === "in-zoho") params.in_zoho_crm = true
     if (filterByZoho === "not-in-zoho") params.in_zoho_crm = false
     return params
-  }
+  }, [page, searchTerm, filterByType, filterByCategory, filterByLocation, filterByZoho, sortBy, sortOrder, businessCategories, locations])
 
   // Fetch leads when filters/sort/page change
   useEffect(() => {
-    getAllLeads(buildApiParams()).then(setFilteredLeads)
-  }, [searchTerm, filterByType, filterByCategory, filterByZoho, sortBy, sortOrder, page, businessCategories])
+    // Only call API if businessCategories is loaded (not empty array)
+    if (businessCategories.length > 0 || (businessCategories.length === 0 && filterByCategory === "all")) {
+      getAllLeads(buildApiParams()).then(setFilteredLeads)
+    }
+  }, [searchTerm, filterByType, filterByCategory, filterByLocation, filterByZoho, sortBy, sortOrder, page, buildApiParams])
 
   // Get unique categories for filters
   const uniqueCategories = businessCategories.map((bc) => bc.name)
+  const uniqueLocations = locations.map((l) => l.name)
 
   const getLeadTypeInfo = (leadType) => {
     return leadTypes.find((lt) => lt.id === leadType) || leadTypes[0]
@@ -143,6 +159,7 @@ const LeadsPage = () => {
     setSearchTerm("")
     setFilterByType("all")
     setFilterByCategory("all")
+    setFilterByLocation("all")
     setFilterByZoho("all")
     setPage(1)
   }
@@ -254,6 +271,22 @@ const LeadsPage = () => {
                     {uniqueCategories.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-normal text-primary">Location</label>
+                <Select value={filterByLocation} onValueChange={setFilterByLocation}>
+                  <SelectTrigger className="h-12 bg-card border-gray-300 font-normal text-primary">
+                    <SelectValue placeholder="All Locations" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card">
+                    <SelectItem value="all">All Locations</SelectItem>
+                    {uniqueLocations.map((location, index) => (
+                      <SelectItem key={`${location}-${index}`} value={location}>
+                        {location}
                       </SelectItem>
                     ))}
                   </SelectContent>
