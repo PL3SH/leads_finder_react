@@ -29,7 +29,7 @@ import { getAllLeads } from "@/services/get_leads"
 import { getBusinessCategories } from "@/services/business_categories"
 
 const LeadsPage = () => {
-  const [leads, setLeads] = useState([]) // Replace with real data fetching logic
+  const [leads, setLeads] = useState([]) // Keep for possible future use
   const [filteredLeads, setFilteredLeads] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const [filterByType, setFilterByType] = useState("all")
@@ -39,83 +39,62 @@ const LeadsPage = () => {
   const [sortOrder, setSortOrder] = useState("desc")
   const [viewMode, setViewMode] = useState("table")
   const [businessCategories, setBusinessCategories] = useState([])
+  const [page, setPage] = useState(1)
+  const leadsPerPage = 50
 
   useEffect(() => {
-    getAllLeads().then(setLeads)
-    getAllLeads().then(setFilteredLeads)
     getBusinessCategories().then(setBusinessCategories)
   }, [])
 
+  // Helper: Map category name to ID
+  const getCategoryIdByName = (name) => {
+    const cat = businessCategories.find((bc) => bc.name === name)
+    return cat ? cat.id : undefined
+  }
+
+  // Helper: Map sort UI to API
+  const getApiSortBy = () => {
+    if (sortBy === "dateAdded" && sortOrder === "desc") return "created_at_desc"
+    if (sortBy === "dateAdded" && sortOrder === "asc") return "created_at_asc"
+    if (sortBy === "leadScore" && sortOrder === "desc") return "score_desc"
+    if (sortBy === "leadScore" && sortOrder === "asc") return "score_asc"
+    if (sortBy === "businessName" && sortOrder === "asc") return "title_asc"
+    if (sortBy === "businessName" && sortOrder === "desc") return "title_desc"
+    return "created_at_desc"
+  }
+
+  // Build API params from UI state
+  const buildApiParams = () => {
+    const params = {
+      skip: (page - 1) * leadsPerPage,
+      limit: leadsPerPage,
+      sort_by: getApiSortBy(),
+    }
+    if (searchTerm) params.words = searchTerm
+    if (filterByType !== "all") params.evaluation_qualitative = filterByType
+    if (filterByCategory !== "all") {
+      const catId = getCategoryIdByName(filterByCategory)
+      if (catId) params.category_id = catId
+    }
+    if (filterByZoho === "in-zoho") params.in_zoho_crm = true
+    if (filterByZoho === "not-in-zoho") params.in_zoho_crm = false
+    return params
+  }
+
+  // Fetch leads when filters/sort/page change
+  useEffect(() => {
+    getAllLeads(buildApiParams()).then(setFilteredLeads)
+  }, [searchTerm, filterByType, filterByCategory, filterByZoho, sortBy, sortOrder, page, businessCategories])
+
   // Get unique categories for filters
   const uniqueCategories = businessCategories.map((bc) => bc.name)
-
-  useEffect(() => {
-    let filtered = leads
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (lead) =>
-          lead.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          lead.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          lead.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          lead.state.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-    }
-
-    // Filter by lead type
-    if (filterByType !== "all") {
-      filtered = filtered.filter((lead) => lead.leadType === filterByType)
-    }
-
-    // Filter by category
-    if (filterByCategory !== "all") {
-      filtered = filtered.filter((lead) => lead.category === filterByCategory)
-    }
-
-    // Filter by Zoho status
-    if (filterByZoho !== "all") {
-      filtered = filtered.filter((lead) => (filterByZoho === "in-zoho" ? lead.isInZoho : !lead.isInZoho))
-    }
-
-    // Sort
-    filtered.sort((a, b) => {
-      let aValue, bValue
-
-      switch (sortBy) {
-        case "businessName":
-          aValue = a.businessName.toLowerCase()
-          bValue = b.businessName.toLowerCase()
-          break
-        case "leadScore":
-          aValue = a.leadScore
-          bValue = b.leadScore
-          break
-        case "dateAdded":
-          aValue = new Date(a.dateAdded).getTime()
-          bValue = new Date(b.dateAdded).getTime()
-          break
-        default:
-          aValue = new Date(a.dateAdded).getTime()
-          bValue = new Date(b.dateAdded).getTime()
-      }
-
-      if (sortOrder === "asc") {
-        return aValue > bValue ? 1 : -1
-      } else {
-        return aValue < bValue ? 1 : -1
-      }
-    })
-
-    setFilteredLeads(filtered)
-  }, [leads, searchTerm, filterByType, filterByCategory, filterByZoho, sortBy, sortOrder])
 
   const getLeadTypeInfo = (leadType) => {
     return leadTypes.find((lt) => lt.id === leadType) || leadTypes[0]
   }
 
   const handleExportToZoho = (leadId) => {
-    setLeads((prev) => prev.map((lead) => (lead.id === leadId ? { ...lead, isInZoho: true } : lead)))
+    setFilteredLeads((prev) => prev.map((lead) => (lead.id === leadId ? { ...lead, isInZoho: true } : lead)))
   }
 
   const exportAllToCSV = () => {
@@ -165,6 +144,7 @@ const LeadsPage = () => {
     setFilterByType("all")
     setFilterByCategory("all")
     setFilterByZoho("all")
+    setPage(1)
   }
 
   return (
@@ -336,6 +316,25 @@ const LeadsPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Pagination Controls */}
+        <div className="flex justify-end items-center gap-4 mb-6">
+          <Button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="bg-card border border-gray-300 text-primary hover:bg-gray-50 font-normal rounded-none"
+          >
+            Previous
+          </Button>
+          <span className="text-primary font-normal">Page {page}</span>
+          <Button
+            onClick={() => setPage((p) => p + 1)}
+            disabled={filteredLeads.length < leadsPerPage}
+            className="bg-card border border-gray-300 text-primary hover:bg-gray-50 font-normal rounded-none"
+          >
+            Next
+          </Button>
+        </div>
 
         {/* Leads Display */}
         {viewMode === "table" ? (

@@ -1,7 +1,14 @@
 import api from "@/services/api";
+import { ka } from "date-fns/locale/ka";
 
-export const getAllLeads = async () => {
-    const response = await api.get("/search-results?limit=1000")
+export const getAllLeads = async (params={}) => {
+    // I want to join params in the shape key=value&key2=value2
+    const queryString = Object.entries(params)
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        .join('&');
+        
+    const response = await api.get(`/search-results?${queryString}`);
+
     console.log("list all leads:", response.data)
     return response.data.map(lead => ({
         id: lead.id,
