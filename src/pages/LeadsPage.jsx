@@ -26,6 +26,7 @@ import {
 } from "lucide-react"
 import { mockTableLeads, leadTypes } from "@/lib/data"
 import { getAllLeads } from "@/services/get_leads"
+import { getBusinessCategories } from "@/services/business_categories"
 
 const LeadsPage = () => {
   const [leads, setLeads] = useState([]) // Replace with real data fetching logic
@@ -37,15 +38,16 @@ const LeadsPage = () => {
   const [sortBy, setSortBy] = useState("dateAdded")
   const [sortOrder, setSortOrder] = useState("desc")
   const [viewMode, setViewMode] = useState("table")
-  
+  const [businessCategories, setBusinessCategories] = useState([])
 
   useEffect(() => {
     getAllLeads().then(setLeads)
     getAllLeads().then(setFilteredLeads)
+    getBusinessCategories().then(setBusinessCategories)
   }, [])
 
   // Get unique categories for filters
-  const uniqueCategories = []
+  const uniqueCategories = businessCategories.map((bc) => bc.name)
 
   useEffect(() => {
     let filtered = leads
@@ -375,19 +377,18 @@ const LeadsPage = () => {
                           <TableCell className="p-6">
                             <div className="flex items-center gap-2">
                               <Star className="h-4 w-4 text-yellow-600 fill-current" />
-                              <span className="font-medium text-primary">{lead.leadScore}</span>
+                              <span className="font-medium text-primary">{lead.leadScore || "NA"}</span>
                             </div>
                           </TableCell>
                           <TableCell className="p-6">
-                            {lead.website ? (
+                            {lead.website != "no website found" ? (
                               <div className="flex items-center gap-2">
                                 <Globe className="h-4 w-4 text-secondary" />
                                 <a
                                   href={lead.website}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-primary hover:underline text-sm font-normal"
-                                >
+                                  className="text-primary hover:underline text-sm font-bold">
                                   View Site
                                 </a>
                               </div>
@@ -480,7 +481,7 @@ const LeadsPage = () => {
                             </Badge>
                             <div className="flex items-center gap-2 bg-yellow-100 px-3 py-2 rounded-none">
                               <Star className="h-4 w-4 text-yellow-600" />
-                              <span className="font-medium text-primary">{lead.leadScore}</span>
+                              <span className="font-medium text-primary">{lead.leadScore || "NA"}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               {lead.isInZoho ? (
@@ -500,16 +501,18 @@ const LeadsPage = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                           <div className="space-y-3">
-                            {lead.phone && (
+                            {lead.phones && (
                               <div className="flex items-center gap-3">
                                 <Phone className="h-4 w-4 text-secondary" />
-                                <span className="text-primary font-normal">{lead.phone}</span>
+                                <span className="text-primary font-normal">{lead.phones[0]}</span>
                               </div>
                             )}
-                            {lead.email && (
+                            {lead.emails && (
                               <div className="flex items-center gap-3">
                                 <Mail className="h-4 w-4 text-secondary" />
-                                <span className="text-primary font-normal">{lead.email}</span>
+                                <span className="text-primary font-normal">
+                                  {lead.emails[0]  || "No email found"}
+                                </span>
                               </div>
                             )}
                             {lead.website && (
@@ -531,32 +534,32 @@ const LeadsPage = () => {
                               <MapPin className="h-4 w-4 text-secondary mt-0.5" />
                               <span className="text-primary font-normal">{lead.address}</span>
                             </div>
-                            {lead.lighthouseScore && (
+                            {lead.leadScore && (
                               <div>
                                 <span className="text-secondary font-normal">Lighthouse Score: </span>
                                 <span
                                   className={`font-medium ${
-                                    lead.lighthouseScore >= 80
+                                    lead.leadScore >= 80
                                       ? "text-green-600"
-                                      : lead.lighthouseScore >= 40
+                                      : lead.leadScore >= 40
                                         ? "text-yellow-600"
                                         : "text-red-600"
                                   }`}
                                 >
-                                  {lead.lighthouseScore}/100
+                                  {lead.leadScore}/100
                                 </span>
                               </div>
                             )}
                             <div>
                               <span className="text-secondary font-normal">Date Added: </span>
                               <span className="text-primary font-normal">
-                                {new Date(lead.dateAdded).toLocaleDateString()}
+                                {new Date(Date.now()).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                               </span>
                             </div>
                           </div>
                         </div>
 
-                        <p className="text-secondary font-normal">{leadTypeInfo.description}</p>
+                        <p className="text-secondary font-normal">{lead.source}</p>
                       </div>
 
                       <div className="flex flex-col gap-3 lg:ml-6">

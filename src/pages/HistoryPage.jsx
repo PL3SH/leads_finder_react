@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/Card"
 import { Badge } from "@/components/ui/Badge"
 import { MapPin, Building2, Users, Download, RefreshCw, Eye, Trash2, History } from "lucide-react"
 import { searchStorage } from "@/lib/storage"
-import { businessTypes, cities } from "@/lib/data"
+//import { businessTypes, cities } from "@/lib/data"
 
 const HistoryPage = () => {
   const [searchResults, setSearchResults] = useState([])

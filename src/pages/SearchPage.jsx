@@ -26,6 +26,10 @@ const SearchPage = () => {
   const [cities, setCities] = useState([])
   const [businessCategories, setBusinessCategories] = useState([])
 
+  // 2. Variables derivadas
+  const businessCategoryName = businessCategories.find((bc) => bc.id === selectedBusinessCategories[0])?.name || "Select business type"
+  const selectedCityName = cities.find(city => city.location_id === selectedCities[0])?.formatted_name || "Select location";
+
   useEffect(() => {
     getCities().then(setCities)
   }, [])
@@ -33,8 +37,6 @@ const SearchPage = () => {
   useEffect(() => {
     getBusinessCategories().then(setBusinessCategories)
   }, [])
-  const businessCategoryName = businessCategories.find((bc) => bc.id === selectedBusinessCategories[0])?.name || "Select business type"
-  const selectedCityName = cities.find(city => city.location_id === selectedCities[0])?.formatted_name || "Select location";
 
   const handleSearch = async () => {
 
@@ -158,7 +160,7 @@ const SearchPage = () => {
                 <div className="space-y-4">
                   {/* Custom Search Query */}
                   <div className="space-y-3">
-                    <Label className="text-primary font-normal text-sm">Custom Google Search Query (Optional)</Label>
+                    <Label className="text-primary font-normal text-sm">Custom Google Maps Search Query (Optional)</Label>
                     <Input
                       value={customSearchQuery}
                       onChange={(e) => setCustomSearchQuery(e.target.value)}

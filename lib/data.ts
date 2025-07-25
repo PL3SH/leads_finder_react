@@ -1,77 +1,37 @@
 import type {
-  BusinessType,
-  City,
   Lead,
   SearchResult,
   LeadType,
   LeadTableItem,
-  SearchTrendData,
-  CompetitorAnalysis,
 } from "./types"
 
-export const businessTypes: BusinessType[] = [
-  { id: "bakery", name: "Bakery", category: "Food & Beverage" },
-  { id: "dentist", name: "Dentist", category: "Healthcare" },
-  { id: "restaurant", name: "Restaurant", category: "Food & Beverage" },
-  { id: "salon", name: "Hair Salon", category: "Beauty & Wellness" },
-  { id: "gym", name: "Gym", category: "Fitness" },
-  { id: "plumber", name: "Plumber", category: "Home Services" },
-  { id: "lawyer", name: "Lawyer", category: "Professional Services" },
-  { id: "accountant", name: "Accountant", category: "Professional Services" },
-  { id: "mechanic", name: "Auto Mechanic", category: "Automotive" },
-  { id: "florist", name: "Florist", category: "Retail" },
-  { id: "photographer", name: "Photographer", category: "Creative Services" },
-  { id: "contractor", name: "Contractor", category: "Construction" },
-]
 
-export const cities: City[] = [
-  { id: "atlanta", name: "Atlanta", state: "GA" },
-  { id: "austin", name: "Austin", state: "TX" },
-  { id: "boston", name: "Boston", state: "MA" },
-  { id: "chicago", name: "Chicago", state: "IL" },
-  { id: "dallas", name: "Dallas", state: "TX" },
-  { id: "denver", name: "Denver", state: "CO" },
-  { id: "houston", name: "Houston", state: "TX" },
-  { id: "los-angeles", name: "Los Angeles", state: "CA" },
-  { id: "miami", name: "Miami", state: "FL" },
-  { id: "new-york", name: "New York", state: "NY" },
-  { id: "philadelphia", name: "Philadelphia", state: "PA" },
-  { id: "phoenix", name: "Phoenix", state: "AZ" },
-  { id: "san-francisco", name: "San Francisco", state: "CA" },
-  { id: "seattle", name: "Seattle", state: "WA" },
-]
 
 export const leadTypes: LeadType[] = [
   {
-    id: "excellent",
+    id: "alto",
     label: "Excellent Prospect",
-    description: "No website but has contact info",
+    description: "Poor website (Lighthouse <40) with some or none contact  info",
     color: "bg-green-100 text-green-800",
   },
   {
-    id: "good",
-    label: "Good Lead",
-    description: "Poor website (Lighthouse <40) with contact info",
-    color: "bg-blue-100 text-blue-800",
-  },
-  {
-    id: "medium",
+    id: "medio",
     label: "Medium Lead",
     description: "Average website (Lighthouse 40-79) with contact info",
     color: "bg-yellow-100 text-yellow-800",
   },
   {
-    id: "poor",
+    id: "bajo",
     label: "Poor Lead",
     description: "Good website (Lighthouse 80+) with contact info",
     color: "bg-purple-100 text-purple-800",
   },
   {
-    id: "research-needed",
-    label: "Research Needed",
-    description: "No website and no contact info",
-    color: "bg-gray-100 text-gray-800",
-  },
+    id: "desconocido",
+    label: "Poor Lead",
+    description: "No info provided by pagespeed or Lighthouse",
+    color: "bg-black text-white",
+  }
 ]
 
 export const mockLeads: Lead[] = [
