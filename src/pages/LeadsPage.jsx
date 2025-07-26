@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Card, CardContent } from "@/components/ui/Card"
 import { Badge } from "@/components/ui/Badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
 import {
   Eye,
@@ -25,88 +25,92 @@ import {
   MapPin,
 } from "lucide-react"
 import { mockTableLeads, leadTypes } from "@/lib/data"
+import { getAllLeads } from "@/services/get_leads"
+import { getBusinessCategories } from "@/services/business_categories"
+import { getLocations } from "@/services/locations"
 
 const LeadsPage = () => {
-  const [leads, setLeads] = useState(mockTableLeads)
-  const [filteredLeads, setFilteredLeads] = useState(mockTableLeads)
+  const [leads, setLeads] = useState([]) // Keep for possible future use
+  const [filteredLeads, setFilteredLeads] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const [filterByType, setFilterByType] = useState("all")
   const [filterByCategory, setFilterByCategory] = useState("all")
+  const [filterByLocation, setFilterByLocation] = useState("all")
   const [filterByZoho, setFilterByZoho] = useState("all")
   const [sortBy, setSortBy] = useState("dateAdded")
   const [sortOrder, setSortOrder] = useState("desc")
   const [viewMode, setViewMode] = useState("table")
-
-  // Get unique categories for filters
-  const uniqueCategories = Array.from(new Set(leads.map((lead) => lead.category)))
+  const [businessCategories, setBusinessCategories] = useState([])
+  const [locations, setLocations] = useState([])
+  const [page, setPage] = useState(1)
+  const leadsPerPage = 50
 
   useEffect(() => {
-    let filtered = leads
+    getBusinessCategories().then(setBusinessCategories)
+    getLocations().then(setLocations)
+  }, [])
 
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (lead) =>
-          lead.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          lead.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          lead.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          lead.state.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
+  // Helper: Map category name to ID
+  const getCategoryIdByName = (name) => {
+    const cat = businessCategories.find((bc) => bc.name === name)
+    return cat ? cat.id : undefined
+  }
+  const getLocationIdByName = (name) => {
+    const loc = locations.find((l) => l.name === name)
+    return loc ? loc.id : undefined
+  }
+
+  // Helper: Map sort UI to API
+  const getApiSortBy = () => {
+    if (sortBy === "dateAdded" && sortOrder === "desc") return "created_at_desc"
+    if (sortBy === "dateAdded" && sortOrder === "asc") return "created_at_asc"
+    if (sortBy === "leadScore" && sortOrder === "desc") return "score_desc"
+    if (sortBy === "leadScore" && sortOrder === "asc") return "score_asc"
+    if (sortBy === "businessName" && sortOrder === "asc") return "title_asc"
+    if (sortBy === "businessName" && sortOrder === "desc") return "title_desc"
+    return "created_at_desc"
+  }
+
+  // Build API params from UI state
+  const buildApiParams = useCallback(() => {
+    const params = {
+      skip: (page - 1) * leadsPerPage,
+      limit: leadsPerPage,
+      sort_by: getApiSortBy(),
     }
-
-    // Filter by lead type
-    if (filterByType !== "all") {
-      filtered = filtered.filter((lead) => lead.leadType === filterByType)
-    }
-
-    // Filter by category
+    if (searchTerm) params.words = searchTerm
+    if (filterByType !== "all") params.evaluation_qualitative = filterByType
     if (filterByCategory !== "all") {
-      filtered = filtered.filter((lead) => lead.category === filterByCategory)
+      const catId = getCategoryIdByName(filterByCategory)
+      if (catId) params.category_id = catId
     }
-
-    // Filter by Zoho status
-    if (filterByZoho !== "all") {
-      filtered = filtered.filter((lead) => (filterByZoho === "in-zoho" ? lead.isInZoho : !lead.isInZoho))
+    if (filterByLocation !== "all") {
+      const locId = getLocationIdByName(filterByLocation)
+      if (locId) params.location_id = locId
     }
+    if (filterByZoho === "in-zoho") params.in_zoho_crm = true
+    if (filterByZoho === "not-in-zoho") params.in_zoho_crm = false
+    return params
+  }, [page, searchTerm, filterByType, filterByCategory, filterByLocation, filterByZoho, sortBy, sortOrder, businessCategories, locations])
 
-    // Sort
-    filtered.sort((a, b) => {
-      let aValue, bValue
+  // Fetch leads when filters/sort/page change
+  useEffect(() => {
+    // Only call API if businessCategories is loaded (not empty array)
+    if (businessCategories.length > 0 || (businessCategories.length === 0 && filterByCategory === "all")) {
+      getAllLeads(buildApiParams()).then(setFilteredLeads)
+    }
+  }, [searchTerm, filterByType, filterByCategory, filterByLocation, filterByZoho, sortBy, sortOrder, page, buildApiParams])
 
-      switch (sortBy) {
-        case "businessName":
-          aValue = a.businessName.toLowerCase()
-          bValue = b.businessName.toLowerCase()
-          break
-        case "leadScore":
-          aValue = a.leadScore
-          bValue = b.leadScore
-          break
-        case "dateAdded":
-          aValue = new Date(a.dateAdded).getTime()
-          bValue = new Date(b.dateAdded).getTime()
-          break
-        default:
-          aValue = new Date(a.dateAdded).getTime()
-          bValue = new Date(b.dateAdded).getTime()
-      }
-
-      if (sortOrder === "asc") {
-        return aValue > bValue ? 1 : -1
-      } else {
-        return aValue < bValue ? 1 : -1
-      }
-    })
-
-    setFilteredLeads(filtered)
-  }, [leads, searchTerm, filterByType, filterByCategory, filterByZoho, sortBy, sortOrder])
+  // Get unique categories for filters
+  const uniqueCategories = businessCategories.map((bc) => bc.name)
+  const uniqueLocations = locations.map((l) => l.name)
 
   const getLeadTypeInfo = (leadType) => {
     return leadTypes.find((lt) => lt.id === leadType) || leadTypes[0]
   }
 
   const handleExportToZoho = (leadId) => {
-    setLeads((prev) => prev.map((lead) => (lead.id === leadId ? { ...lead, isInZoho: true } : lead)))
+    setFilteredLeads((prev) => prev.map((lead) => (lead.id === leadId ? { ...lead, isInZoho: true } : lead)))
   }
 
   const exportAllToCSV = () => {
@@ -155,7 +159,9 @@ const LeadsPage = () => {
     setSearchTerm("")
     setFilterByType("all")
     setFilterByCategory("all")
+    setFilterByLocation("all")
     setFilterByZoho("all")
+    setPage(1)
   }
 
   return (
@@ -270,6 +276,22 @@ const LeadsPage = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <label className="text-sm font-normal text-primary">Location</label>
+                <Select value={filterByLocation} onValueChange={setFilterByLocation}>
+                  <SelectTrigger className="h-12 bg-card border-gray-300 font-normal text-primary">
+                    <SelectValue placeholder="All Locations" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card">
+                    <SelectItem value="all">All Locations</SelectItem>
+                    {uniqueLocations.map((location, index) => (
+                      <SelectItem key={`${location}-${index}`} value={location}>
+                        {location}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-normal text-primary">Zoho Status</label>
@@ -328,6 +350,25 @@ const LeadsPage = () => {
           </CardContent>
         </Card>
 
+        {/* Pagination Controls */}
+        <div className="flex justify-end items-center gap-4 mb-6">
+          <Button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="bg-card border border-gray-300 text-primary hover:bg-gray-50 font-normal rounded-none"
+          >
+            Previous
+          </Button>
+          <span className="text-primary font-normal">Page {page}</span>
+          <Button
+            onClick={() => setPage((p) => p + 1)}
+            disabled={filteredLeads.length < leadsPerPage}
+            className="bg-card border border-gray-300 text-primary hover:bg-gray-50 font-normal rounded-none"
+          >
+            Next
+          </Button>
+        </div>
+
         {/* Leads Display */}
         {viewMode === "table" ? (
           <Card className="border-0 shadow-none bg-card">
@@ -368,19 +409,18 @@ const LeadsPage = () => {
                           <TableCell className="p-6">
                             <div className="flex items-center gap-2">
                               <Star className="h-4 w-4 text-yellow-600 fill-current" />
-                              <span className="font-medium text-primary">{lead.leadScore}</span>
+                              <span className="font-medium text-primary">{lead.leadScore || "NA"}</span>
                             </div>
                           </TableCell>
                           <TableCell className="p-6">
-                            {lead.website ? (
+                            {lead.website != "no website found" ? (
                               <div className="flex items-center gap-2">
                                 <Globe className="h-4 w-4 text-secondary" />
                                 <a
                                   href={lead.website}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-primary hover:underline text-sm font-normal"
-                                >
+                                  className="text-primary hover:underline text-sm font-bold">
                                   View Site
                                 </a>
                               </div>
@@ -473,7 +513,7 @@ const LeadsPage = () => {
                             </Badge>
                             <div className="flex items-center gap-2 bg-yellow-100 px-3 py-2 rounded-none">
                               <Star className="h-4 w-4 text-yellow-600" />
-                              <span className="font-medium text-primary">{lead.leadScore}</span>
+                              <span className="font-medium text-primary">{lead.leadScore || "NA"}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               {lead.isInZoho ? (
@@ -493,16 +533,18 @@ const LeadsPage = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                           <div className="space-y-3">
-                            {lead.phone && (
+                            {lead.phones && (
                               <div className="flex items-center gap-3">
                                 <Phone className="h-4 w-4 text-secondary" />
-                                <span className="text-primary font-normal">{lead.phone}</span>
+                                <span className="text-primary font-normal">{lead.phones[0]}</span>
                               </div>
                             )}
-                            {lead.email && (
+                            {lead.emails && (
                               <div className="flex items-center gap-3">
                                 <Mail className="h-4 w-4 text-secondary" />
-                                <span className="text-primary font-normal">{lead.email}</span>
+                                <span className="text-primary font-normal">
+                                  {lead.emails[0]  || "No email found"}
+                                </span>
                               </div>
                             )}
                             {lead.website && (
@@ -524,32 +566,32 @@ const LeadsPage = () => {
                               <MapPin className="h-4 w-4 text-secondary mt-0.5" />
                               <span className="text-primary font-normal">{lead.address}</span>
                             </div>
-                            {lead.lighthouseScore && (
+                            {lead.leadScore && (
                               <div>
                                 <span className="text-secondary font-normal">Lighthouse Score: </span>
                                 <span
                                   className={`font-medium ${
-                                    lead.lighthouseScore >= 80
+                                    lead.leadScore >= 80
                                       ? "text-green-600"
-                                      : lead.lighthouseScore >= 40
+                                      : lead.leadScore >= 40
                                         ? "text-yellow-600"
                                         : "text-red-600"
                                   }`}
                                 >
-                                  {lead.lighthouseScore}/100
+                                  {lead.leadScore}/100
                                 </span>
                               </div>
                             )}
                             <div>
                               <span className="text-secondary font-normal">Date Added: </span>
                               <span className="text-primary font-normal">
-                                {new Date(lead.dateAdded).toLocaleDateString()}
+                                {new Date(Date.now()).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                               </span>
                             </div>
                           </div>
                         </div>
 
-                        <p className="text-secondary font-normal">{leadTypeInfo.description}</p>
+                        <p className="text-secondary font-normal">{lead.source}</p>
                       </div>
 
                       <div className="flex flex-col gap-3 lg:ml-6">
