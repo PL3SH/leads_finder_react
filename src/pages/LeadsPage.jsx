@@ -3,10 +3,11 @@
 import { useState, useEffect, useCallback } from "react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/Button"
+import { Label } from "@/components/ui/Label"
 import { Input } from "@/components/ui/Input"
 import { Card, CardContent } from "@/components/ui/Card"
 import { Badge } from "@/components/ui/Badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
 import {
   Eye,
@@ -23,8 +24,9 @@ import {
   Phone,
   Mail,
   MapPin,
+  Building2,
 } from "lucide-react"
-import { mockTableLeads, leadTypes } from "@/lib/data"
+import { leadTypes } from "@/lib/data"
 import { getAllLeads } from "@/services/get_leads"
 import { getBusinessCategories } from "@/services/business_categories"
 import { getLocations } from "@/services/locations"
@@ -34,7 +36,7 @@ const LeadsPage = () => {
   const [filteredLeads, setFilteredLeads] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const [filterByType, setFilterByType] = useState("all")
-  const [filterByCategory, setFilterByCategory] = useState("all")
+  const [selectedBusinessCategories, setSelectedBusinessCategories] = useState(["all"])
   const [filterByLocation, setFilterByLocation] = useState("all")
   const [filterByZoho, setFilterByZoho] = useState("all")
   const [sortBy, setSortBy] = useState("dateAdded")
@@ -45,20 +47,16 @@ const LeadsPage = () => {
   const [page, setPage] = useState(1)
   const leadsPerPage = 50
 
+  // Get the display name for business category
+  const businessCategoryName = businessCategories.find((bc) => bc.id === selectedBusinessCategories[0])?.name || "All Business Types"
+
   useEffect(() => {
-    getBusinessCategories().then(setBusinessCategories)
     getLocations().then(setLocations)
   }, [])
 
-  // Helper: Map category name to ID
-  const getCategoryIdByName = (name) => {
-    const cat = businessCategories.find((bc) => bc.name === name)
-    return cat ? cat.id : undefined
-  }
-  const getLocationIdByName = (name) => {
-    const loc = locations.find((l) => l.name === name)
-    return loc ? loc.id : undefined
-  }
+  useEffect(() => {
+    getBusinessCategories().then(setBusinessCategories)
+  }, [])
 
   // Helper: Map sort UI to API
   const getApiSortBy = () => {
@@ -78,31 +76,37 @@ const LeadsPage = () => {
       limit: leadsPerPage,
       sort_by: getApiSortBy(),
     }
+
     if (searchTerm) params.words = searchTerm
     if (filterByType !== "all") params.evaluation_qualitative = filterByType
-    if (filterByCategory !== "all") {
-      const catId = getCategoryIdByName(filterByCategory)
-      if (catId) params.category_id = catId
+
+    // Handle business category filtering
+    if (selectedBusinessCategories[0] && selectedBusinessCategories[0] !== "all") {
+      params.category_id = selectedBusinessCategories[0]
     }
-    if (filterByLocation !== "all") {
-      const locId = getLocationIdByName(filterByLocation)
-      if (locId) params.location_id = locId
+
+    // Handle location filtering
+    if (filterByLocation && filterByLocation !== "all") {
+      // Find the location by name and get its ID
+      const location = locations.find(loc => loc.name === filterByLocation)
+      if (location) {
+        params.location_id = location.id
+      }
     }
+
     if (filterByZoho === "in-zoho") params.in_zoho_crm = true
     if (filterByZoho === "not-in-zoho") params.in_zoho_crm = false
+
     return params
-  }, [page, searchTerm, filterByType, filterByCategory, filterByLocation, filterByZoho, sortBy, sortOrder, businessCategories, locations])
+  }, [page, searchTerm, filterByType, selectedBusinessCategories, filterByLocation, filterByZoho, sortBy, sortOrder, locations])
 
   // Fetch leads when filters/sort/page change
   useEffect(() => {
-    // Only call API if businessCategories is loaded (not empty array)
-    if (businessCategories.length > 0 || (businessCategories.length === 0 && filterByCategory === "all")) {
-      getAllLeads(buildApiParams()).then(setFilteredLeads)
-    }
-  }, [searchTerm, filterByType, filterByCategory, filterByLocation, filterByZoho, sortBy, sortOrder, page, buildApiParams])
+    // Call API when any filter changes
+    getAllLeads(buildApiParams()).then(setFilteredLeads)
+  }, [searchTerm, filterByType, selectedBusinessCategories, filterByLocation, filterByZoho, sortBy, sortOrder, page, buildApiParams])
 
-  // Get unique categories for filters
-  const uniqueCategories = businessCategories.map((bc) => bc.name)
+  // Get unique locations for filters
   const uniqueLocations = locations.map((l) => l.name)
 
   const getLeadTypeInfo = (leadType) => {
@@ -158,7 +162,7 @@ const LeadsPage = () => {
   const clearAllFilters = () => {
     setSearchTerm("")
     setFilterByType("all")
-    setFilterByCategory("all")
+    setSelectedBusinessCategories(["all"])
     setFilterByLocation("all")
     setFilterByZoho("all")
     setPage(1)
@@ -173,19 +177,19 @@ const LeadsPage = () => {
             <div>
               <h1 className="text-5xl font-normal text-primary mb-6 leading-tight">All Leads</h1>
               <p className="text-lg text-secondary font-normal leading-relaxed max-w-4xl">
-                Manage and organize all your business leads in one centralized location. Filter, sort, and export your
-                lead database.
+                Manage and organize all your business leads in one centralized location.
+              </p>
+              <p className="text-lg text-secondary font-normal leading-relaxed max-w-4xl">
+                Filter, sort, and export your lead database.
               </p>
             </div>
             <div className="flex items-center gap-6">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-                  <Database className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <div className="text-3xl font-normal text-primary">{filteredLeads.length}</div>
-                  <div className="text-sm text-secondary font-normal">Total Leads</div>
-                </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                <Database className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-3xl font-normal text-primary">{filteredLeads.length}</div>
+                <div className="text-sm text-secondary font-normal">Total Leads</div>
               </div>
 
               {/* View Toggle */}
@@ -232,9 +236,12 @@ const LeadsPage = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 mb-6">
               <div className="space-y-2">
-                <label className="text-sm font-normal text-primary">Search leads</label>
+                <Label className="flex items-center gap-2 text-primary font-normal text-sm">
+                  <Filter className="h-4 w-4" />
+                  Search leads
+                </Label>
                 <Input
                   placeholder="Search by name, category..."
                   value={searchTerm}
@@ -244,7 +251,10 @@ const LeadsPage = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-normal text-primary">Lead Type</label>
+                <Label className="flex items-center gap-2 text-primary font-normal text-sm">
+                  <Star className="h-4 w-4" />
+                  Lead Type
+                </Label>
                 <Select value={filterByType} onValueChange={setFilterByType}>
                   <SelectTrigger className="h-12 bg-card border-gray-300 font-normal text-primary">
                     <SelectValue placeholder="All Types" />
@@ -261,23 +271,30 @@ const LeadsPage = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-normal text-primary">Category</label>
-                <Select value={filterByCategory} onValueChange={setFilterByCategory}>
+                <Label className="flex items-center gap-2 text-primary font-normal text-sm">
+                  <Building2 className="h-4 w-4" />
+                  Business Type
+                </Label>
+                <Select value={selectedBusinessCategories[0] || "all"} onValueChange={(value) => setSelectedBusinessCategories([value])}>
                   <SelectTrigger className="h-12 bg-card border-gray-300 font-normal text-primary">
-                    <SelectValue placeholder="All Categories" />
+                    <SelectValue placeholder={businessCategoryName} />
                   </SelectTrigger>
                   <SelectContent className="bg-card">
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {uniqueCategories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
+                    <SelectItem value="all">All Business Types</SelectItem>
+                    {businessCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="space-y-2">
-                <label className="text-sm font-normal text-primary">Location</label>
+                <Label className="flex items-center gap-2 text-primary font-normal text-sm">
+                  <MapPin className="h-4 w-4" />
+                  Location
+                </Label>
                 <Select value={filterByLocation} onValueChange={setFilterByLocation}>
                   <SelectTrigger className="h-12 bg-card border-gray-300 font-normal text-primary">
                     <SelectValue placeholder="All Locations" />
@@ -294,7 +311,10 @@ const LeadsPage = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-normal text-primary">Zoho Status</label>
+                <Label className="flex items-center gap-2 text-primary font-normal text-sm">
+                  <Database className="h-4 w-4" />
+                    Zoho Status
+                </Label>
                 <Select value={filterByZoho} onValueChange={setFilterByZoho}>
                   <SelectTrigger className="h-12 bg-card border-gray-300 font-normal text-primary">
                     <SelectValue placeholder="All Status" />
@@ -308,7 +328,10 @@ const LeadsPage = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-normal text-primary">Sort by</label>
+                <Label className="flex items-center gap-2 text-primary font-normal text-sm">
+                  <Eye className="h-4 w-4" />
+                  Sort by
+                </Label>
                 <Select
                   value={`${sortBy}-${sortOrder}`}
                   onValueChange={(value) => {
@@ -429,20 +452,18 @@ const LeadsPage = () => {
                             )}
                           </TableCell>
                           <TableCell className="p-6">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center">
                               {lead.isInZoho ? (
                                 <>
                                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
                                     <Check className="h-3 w-3 text-green-600" />
                                   </div>
-                                  <span className="text-primary font-normal text-sm">In Zoho</span>
                                 </>
                               ) : (
                                 <>
                                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-100">
                                     <X className="h-3 w-3 text-gray-600" />
                                   </div>
-                                  <span className="text-secondary text-sm font-normal">Not in Zoho</span>
                                 </>
                               )}
                             </div>
