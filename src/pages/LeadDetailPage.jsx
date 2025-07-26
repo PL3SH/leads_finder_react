@@ -21,7 +21,8 @@ import {
   User,
   Clock,
   Briefcase,
-  Brain
+  Brain,
+  Chrome
 } from "lucide-react"
 import {  leadTypes } from "@/lib/data"
 import { getLeadsDetails } from "@/services/get_leads"
@@ -56,34 +57,23 @@ const LeadDetailPage = () => {
     )
   }
   const leadTypeInfo = leadTypes.find((lt) => lt.id === lead.qualitative) || leadTypes[0]
-  const getOutreachScript = () => {
-    switch (lead.leadType) {
-      case "alto":
-        return `Hi ${lead.businessName} team,\n\nI noticed you don't currently have a website, but you have great contact information available. In today's digital world, having a professional website can significantly boost your visibility and customer reach.\n\nI'd love to discuss how we can help you establish a strong online presence. Would you be interested in a brief conversation about your digital marketing needs?\n\nBest regards,`
-      case "medio":
-        return `Hi ${lead.businessName} team,\n\nYour website shows good potential, and I see opportunities to take it to the next level. We specialize in helping businesses like yours improve their online performance and customer engagement.\n\nWould you be interested in learning about some strategies that could boost your online results?\n\nBest regards,`
-      case "bajo":
-        return `Hello ${lead.businessName},\n\nI was impressed by your professional website! It's clear you understand the importance of a strong online presence. I'd love to discuss some advanced strategies that could help you maximize your digital marketing ROI.\n\nWould you be open to exploring some cutting-edge approaches to online growth?\n\nBest regards,`
-      default:
-        return `Hi ${lead.businessName},\n\nI'd love to learn more about your business and discuss how we might be able to help you grow your online presence.\n\nWould you be interested in a brief conversation?\n\nBest regards,`
-    }
-  }
-
-  const getSourceIcon = (lead) => {
-    // Si no hay lead, no mostramos nada
-    if (!lead) return null;
-  
-    const { is_google_search, is_maps_search, is_local_search } = lead;
-  
+  const getSourceIcon = (is_google_search, is_maps_search, is_local_search) => {
     // Ambos Google Maps y Google Search
     if (is_google_search && is_maps_search) {
       return (
         <div className="flex gap-1">
           <Map className="h-4 w-4" />
-          <SearchIcon className="h-4 w-4" />
+          <Chrome className="h-4 w-4" />
         </div>
       );
     }
+    if (is_google_search) {
+      return <Chrome className="h-5 w-5" />;
+    }
+    if (is_maps_search) {
+      return <Map className="h-5 w-5" />;
+    }
+    
   
     // Solo Google Maps
     if (is_maps_search) {
@@ -106,17 +96,19 @@ const LeadDetailPage = () => {
     return null;
   };
 
-  const getSourceLabel = (source) => {
-    switch (source) {
-      case "google-maps":
-        return "Google Maps"
-      case "google-search":
-        return "Google Search"
-      case "both":
-        return "Maps + Search"
-      default:
-        return "Unknown"
+  const getSourceLabel = (is_google_search, is_maps_search, is_local_search) => {
+    if (is_google_search == true) {
+      return "Google Search"
     }
+    if (is_maps_search == true) {
+        return "Google Maps"
+    }
+    if (is_local_search == true) {
+      return "Local Search"
+    }if(is_google_search == true && is_maps_search == true) {
+      return "Google Search + Google Maps"
+    }
+    return "Unknown"
   }
 
   return (
@@ -201,14 +193,13 @@ const LeadDetailPage = () => {
                             <Globe className="h-6 w-6 text-purple-600" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-normal text-primary">Website</h3>
+                            
                             <a
                               href={lead.website}
                               target="_blank"
                               rel="noopener noreferrer"
                             >
                               <Button className="bg-black hover:bg-gray-800 text-white font-normal rounded-20px">
-                                <Globe className="mr-2 h-4 w-4 text-purple-600" />
                                 Visit Website
                               </Button>
                             </a>
@@ -234,23 +225,19 @@ const LeadDetailPage = () => {
                             <MapPin className="h-6 w-6 text-red-600" />
                           </div>
                           <div>
-                              <h3 className="text-xl font-normal text-primary">Country</h3>
-                              <p className="text-secondary font-normal">{lead.country}</p>
-                              <h3 className="text-xl font-normal text-primary">State</h3>
-                              <p className="text-secondary font-normal">{lead.state}</p>
-                              <h3 className="text-xl font-normal text-primary">City</h3>
-                            <p className="text-secondary font-normal">{lead.city}</p>
+                              <h3 className="text-xl font-normal text-primary">Location</h3>
+                              <p className="text-secondary font-normal">{lead.city}, {lead.state}, {lead.country}</p>
                           </div>
                         </div>
                       )}
-                      {lead.source && (
+                      {(lead.is_maps_search || lead.is_google_search) && (
                         <div className="flex items-center gap-4">
                           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
-                            {getSourceIcon(lead.source)}
+                            {getSourceIcon(lead.is_google_search, lead.is_maps_search, lead.is_local_search)}
                           </div>
                           <div>
                             <h3 className="text-xl font-normal text-primary">Source</h3>
-                            <p className="text-secondary font-normal">{getSourceLabel(lead.source)}</p>
+                            <p className="text-secondary font-normal">{getSourceLabel(lead.is_google_search, lead.is_maps_search, lead.is_local_search)}</p>
                           </div>
                         </div>
                       )}
@@ -281,80 +268,93 @@ const LeadDetailPage = () => {
                     <h2 className="text-2xl font-normal text-primary">Lead Analisys</h2>
                   </div>
                   <p className="text-secondary font-normal">
-                    {lead.evaluation_analysis || "No analysis available for this lead."}
+                    {lead.analysis.map((analysis)=>{
+                      return (
+                        <ul key={analysis.id}>
+                          <li>{analysis}</li>
+                        </ul>
+                      )
+                    })}
                   </p>
                 </div>
               </CardContent>
             </Card>
             {/* Outreach Script */}
-            <Card className="border-0 shadow-none bg-card">
-              <CardContent className="p-8">
-                <div className="mb-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
-                      <MessageSquare className="h-5 w-5 text-green-600" />
-                    </div>
-                    <h2 className="text-2xl font-normal text-primary">Outreach Script</h2>
-                  </div>
-                  <p className="text-secondary font-normal">
-                    A suggested script for reaching out to {lead.businessName}
-                  </p>
-                </div>
-                <Textarea
-                  value={getOutreachScript()}
-                  readOnly
-                  className="bg-gray-50 text-primary font-normal rounded-none"
-                />
-              </CardContent>
-            </Card>
+            
           </div>
 
           {/* Additional Information */}
           <div className="space-y-8">
-            {/* Notes */}
+            {/* Performance metrics  */}
             <Card className="border-0 shadow-none bg-card">
               <CardContent className="p-8">
-                <div className="mb-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100">
-                      <Lightbulb className="h-5 w-5 text-yellow-600" />
-                    </div>
-                    <h2 className="text-2xl font-normal text-primary">Notes</h2>
-                  </div>
-                  <p className="text-secondary font-normal">Add any additional notes or comments about this lead.</p>
-                </div>
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="bg-gray-50 text-primary font-normal rounded-none"
-                />
+               <p className="text-2xl font-normal text-primary mb-4">Performance metrics</p>
+               <div className="flex items-center gap-4 mb-6">
+               <div className=" font-normal ">
+                <p> CLS: {lead.metrics?.cls || 0}/100</p>
+                <p> FCP: {lead.metrics?.fcp || 0}/100</p>
+                <p> LCP: {lead.metrics?.lcp || 0}/100</p>
+                <p> TBT: {lead.metrics?.tbt || 0}/100</p>
+                <p> TTI: {lead.metrics?.tti || 0}/100</p>
+               </div>
+              
+               </div>
               </CardContent>
             </Card>
 
-            {/* Actions */}
+            {/* Evaluation Analysis */}
             <Card className="border-0 shadow-none bg-card">
               <CardContent className="p-8">
-                <div className="mb-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                      <Download className="h-5 w-5 text-blue-600" />
+                <div className="mb-6">
+                  <h3 className="text-xl font-normal text-primary mb-2">SEO Score</h3>
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="text-4xl font-bold text-primary">{lead.metrics?.seo_score || 0}/100</div>
+                    <div className="flex-1 bg-gray-200 h-3 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-gradient-to-r from-blue-500 to-green-500 h-full rounded-full transition-all duration-300"
+                        style={{ width: `${lead.metrics?.seo_score || 0}%` }}
+                      ></div>
                     </div>
-                    <h2 className="text-2xl font-normal text-primary">Actions</h2>
                   </div>
-                  <p className="text-secondary font-normal">
-                    Take action on this lead by downloading the outreach script or scheduling a follow-up.
+                </div>
+
+                <div className="space-y-4">
+                  {/* SEO Score */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-primary">Performance Score</span>
+                    <span className="text-sm font-medium text-green-600">{lead.metrics?.performance_score || 0}/100</span>
+                  </div>
+                  <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                    <div className="bg-green-500 h-full rounded-full" style={{ width: `${lead.metrics?.performance_score || 0}%` }}></div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-primary">Accessibility Score</span>
+                    <span className="text-sm font-medium text-green-600">{lead.metrics?.accessibility_score || 0}/100</span>
+                  </div>
+                  <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                    <div className="bg-green-500 h-full rounded-full" style={{ width: `${lead.metrics?.accessibility_score || 0}%` }}></div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-primary">Best practices Score</span>
+                    <span className="text-sm font-medium text-green-600">{lead.metrics?.best_practices_score || 0}/100</span>
+                  </div>
+                  <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                    <div className="bg-green-500 h-full rounded-full" style={{ width: `${lead.metrics?.best_practices_score || 0}%` }}></div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <p className="text-xs text-secondary">
+                    SEO score based on local search optimization factors. Higher scores indicate better local visibility.
                   </p>
                 </div>
-                <div className="flex items-center gap-4">
-                  <Button className="bg-black hover:bg-gray-800 text-white font-normal rounded-none">
-                    <Download className="mr-2 h-4 w-4" />
-                    Download Script
-                  </Button>
-                  <Button className="bg-black hover:bg-gray-800 text-white font-normal rounded-none">
-                    <Clock className="mr-2 h-4 w-4" />
-                    Schedule Follow-up
-                  </Button>
-                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-0 shadow-none bg-card">
+              <CardContent className="p-8">
+                <Button className="bg-black hover:bg-gray-800 text-white font-normal rounded-none">
+                  <p>Add to Zoho</p>
+                </Button>
               </CardContent>
             </Card>
           </div>

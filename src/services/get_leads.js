@@ -42,7 +42,6 @@ export const getLeadsDetails = async (id) => {
         address: lead?.address,
         maps_directions_link: lead?.maps_directions_link,
         pagespeed: lead?.pagespeed_score,
-        pagespeed_data: lead?.pagespeed_data,
         screenshot_path: lead?.screenshot_path,
         city: lead?.location_city,
         state: lead?.location_state,
@@ -56,7 +55,9 @@ export const getLeadsDetails = async (id) => {
         emails: lead?.emails,
         is_google_search: lead?.is_google_search,
         is_local_search: lead?.is_local_search,
-        is_maps_search: true,
+        is_maps_search: lead?.is_maps_search,
+        metrics: lead?.performance_metrics,
+        in_zoho_crm: lead?.in_zoho_crm,
     };
 }
 
@@ -66,34 +67,56 @@ export const getLeadsDetails = async (id) => {
 
   [
 {
-  "title": "For Healthy Pets",
-  "website": "no website found",
-  "snippet": "",
-  "position": 4,
-  "rating": 5,
-  "address": "5165 Atlanta Hwy, Montgomery, AL 36109",
-  "maps_directions_link": "https://serpapi.com/search.json?engine=google_maps&google_domain=google.com&hl=en&place_id=ChIJVTP8hy4qjIgR4VQ7M3ERVA0",
-  "pagespeed_score": 0,
-  "pagespeed_data": {},
-  "screenshot_path": "",
-  "emails": [],
-  "phones": [
-    "(334) 245-3471"
-  ],
+  
+  "id": 14,
+  "title": "Kat Smart Aesthetics",
+  "website": "http://www.katsmartaesthetic.com/",
   "evaluation_score": 100,
   "evaluation_qualitative": "alto",
-  "evaluation_analysis": [
-    "Sin sitio web + contactos disponibles - Oportunidad máxima",
-    "Implementar estrategia SEO básica desde el inicio",
-    "Diseñar sitio web optimizado para móviles y rendimiento"
+  "has_contacts": true,
+  "contact_count": 94,
+  "pagespeed_score": 0,
+  "screenshot_path": "screenshots/http_www.katsmartaesthetic.com_.png",
+  "emails": [
+    "Katsmart@atelieraesthetic.com"
   ],
-  "company_website_classification": {},
-  "is_google_search": false,
+  "phones": [
+    "",
+    "+1 646-244-8993",
+    "+1 646-249-6852",
+    "+1 646-244-8995"
+  ],
+  "performance_metrics": {
+    "cls": 0,
+    "fcp": 0,
+    "lcp": 0,
+    "tbt": 0,
+    "tti": 0,
+    "seo_score": 0,
+    "performance_score": 0,
+    "loading_experience": {},
+    "accessibility_score": 0,
+    "best_practices_score": 0
+  },
+  "evaluation_analysis": [
+    "El sitio web no está disponible, lo que representa una oportunidad máxima para desarrollar un sitio funcional que mejore la visibilidad y accesibilidad del negocio.",
+    "Implementar un nuevo sitio web optimizado para Core Web Vitals, asegurando tiempos de carga rápidos y una experiencia de usuario fluida para mejorar el rendimiento.",
+    "Desarrollar una estructura SEO sólida desde cero para mejorar la posición en los resultados de búsqueda y aumentar el tráfico orgánico al sitio."
+  ],
+  "company_website_classification": {
+    "url": "http://www.katsmartaesthetic.com/",
+    "domain": "katsmartaesthetic.com",
+    "reason": "gpt_classification",
+    "gpt_used": true,
+    "heuristic_score": 20
+  },
+  "in_zoho_crm": false,
+  "is_google_search": true,
   "is_local_search": false,
   "is_maps_search": true,
-  "location_city": "Montgomery",
-  "location_state": "Alabama",
+  "location_city": "Fairbanks",
+  "location_state": "Alaska",
   "location_country": "United States",
-  "category_name": "pet_supply_store"
+  "category_name": "Facial Spa"
 }
 */
