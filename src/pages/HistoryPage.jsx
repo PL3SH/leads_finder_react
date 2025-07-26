@@ -76,7 +76,7 @@ const HistoryPage = () => {
 
   return (
     <div className="min-h-screen bg-main">
-      <div className="max-w-6xl mx-auto px-8 py-12">
+      <div className="max-w-10xl mx-auto px-8 py-12">
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-5xl font-normal text-primary mb-6 leading-tight">Search History</h1>

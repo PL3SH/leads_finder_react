@@ -170,7 +170,7 @@ const LeadsPage = () => {
 
   return (
     <div className="min-h-screen bg-main">
-      <div className="max-w-7xl mx-auto px-8 py-12">
+      <div className="max-w-10xl mx-auto px-8 py-12">
         {/* Header */}
         <div className="mb-12">
           <div className="flex items-center justify-between">

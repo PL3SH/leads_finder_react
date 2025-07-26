@@ -8,13 +8,19 @@ const navigation = [
   { name: "History", href: "/history", icon: History },
 ]
 
-const Sidebar = () => {
+const Sidebar = ({ isCollapsed = false }) => {
   const location = useLocation()
 
   return (
-    <div className="flex h-screen w-64 flex-col bg-sidebar">
+    <div className={cn(
+      "flex h-screen flex-col bg-sidebar overflow-hidden",
+      isCollapsed ? "w-0" : "w-64"
+    )}>
       {/* Logo */}
-      <div className="px-6 py-8">
+      <div className={cn(
+        "px-6 py-8 transition-all duration-300",
+        isCollapsed ? "opacity-0" : "opacity-100"
+      )}>
         <div className="flex items-center gap-3 mb-2">
           <div className="w-8 h-8 flex items-center justify-center">
             <svg width="30" height="30" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -43,10 +49,12 @@ const Sidebar = () => {
                   className={cn(
                     "flex items-center space-x-3 px-4 py-3 text-sm font-normal transition-all duration-200 ease-in-out rounded-none",
                     isActive ? "bg-black text-white" : "text-secondary hover:bg-gray-200/50 hover:text-primary",
+                    isCollapsed && "justify-center space-x-0"
                   )}
+                  title={isCollapsed ? item.name : undefined}
                 >
                   <Icon className="h-4 w-4 flex-shrink-0" />
-                  <span>{item.name}</span>
+                  {!isCollapsed && <span>{item.name}</span>}
                 </Link>
               </li>
             )
