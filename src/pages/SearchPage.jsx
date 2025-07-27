@@ -24,7 +24,7 @@ const SearchPage = () => {
   const [cities, setCities] = useState([])
   const [businessCategories, setBusinessCategories] = useState([])
 
-  // 2. Variables derivadas
+  // Get the display name for business category
   const businessCategoryName = businessCategories.find((bc) => bc.id === selectedBusinessCategories[0])?.name || "Select business type"
   const selectedCityName = cities.find(city => city.location_id === selectedCities[0])?.formatted_name || "Select location";
 
@@ -37,7 +37,6 @@ const SearchPage = () => {
   }, [])
 
   const handleSearch = async () => {
-
     setIsSearching(true)
 
     // Create search parameters
@@ -49,6 +48,12 @@ const SearchPage = () => {
       search_local: false,
       search_maps: true,
     }
+
+    // Add category_id if a business category is selected
+    if (selectedBusinessCategories[0]) {
+      searchParams.category_id = selectedBusinessCategories[0]
+    }
+
     const response = await api.post("/search/execute", searchParams)
 
     console.log('Response:  ' , response)
@@ -56,13 +61,11 @@ const SearchPage = () => {
       setIsSearching(false)
     }, 3000)
     return
-
   }
-
 
   return (
     <div className="min-h-screen bg-main">
-      <div className="max-w-10xl mx-auto px-8 py-12">
+      <div className="max-w-6xl mx-auto px-8 py-12">
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-5xl font-normal text-primary mb-6 leading-tight">Find Your Next Business Leads</h1>
@@ -137,9 +140,11 @@ const SearchPage = () => {
                     Businesses to Crawl
                   </Label>
                   <Input
-                    type="text"
+                    type="number"
+                    min="1"
+                    max="500"
                     value={numberOfBusinesses}
-                    onChange={(e) => setNumberOfBusinesses(e.target.value)}
+                    onChange={(e) => setNumberOfBusinesses(Number.parseInt(e.target.value) || 50)}
                     className="h-12 bg-card border-gray-300 font-normal text-primary"
                     placeholder="50"
                   />
