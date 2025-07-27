@@ -7,11 +7,12 @@ import { Input } from "@/components/ui/Input"
 import { Card, CardContent } from "@/components/ui/Card"
 import { Badge } from "@/components/ui/Badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
-import { MapPin, Building2, Users, Download, RefreshCw, Eye, Trash2, History, Check, X, Search, Clock, Play, Filter } from "lucide-react"
+import { MapPin, Building2, Users, Download, RefreshCw, Eye, Trash2, History, Check, X, Search, Clock, Play, Filter, ChevronLeft, ChevronRight } from "lucide-react"
 import { getSearchHistory } from "@/services/search_history"
 import { getBusinessCategories } from "@/services/business_categories"
 import { getLocations } from "@/services/locations"
 import api from "@/services/api"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 
 const HistoryPage = () => {
   const [searchHistory, setSearchHistory] = useState([])
@@ -26,23 +27,52 @@ const HistoryPage = () => {
   const [dateFilter, setDateFilter] = useState("")
   const [isReRunning, setIsReRunning] = useState(false)
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [isLoadingPage, setIsLoadingPage] = useState(false)
+
+  // Calculate pagination values
+  const totalPages = Math.ceil(totalItems / itemsPerPage)
+  const startItem = (currentPage - 1) * itemsPerPage + 1
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems)
+
+  const loadHistoryData = async (page = 1, limit = itemsPerPage) => {
+    try {
+      setIsLoadingPage(true)
+      const skip = (page - 1) * limit
+      const historyData = await getSearchHistory(skip, limit)
+
+      setSearchHistory(historyData)
+      setFilteredHistory(historyData)
+      setTotalItems(historyData.length + (page - 1) * limit) // Estimate total
+      setCurrentPage(page)
+    } catch (err) {
+      console.error('Error loading history:', err)
+      setError('Failed to load search history')
+    } finally {
+      setIsLoadingPage(false)
+    }
+  }
+
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true)
-        const [historyData, categoriesData, locationsData] = await Promise.all([
-          getSearchHistory(),
+        const [categoriesData, locationsData] = await Promise.all([
           getBusinessCategories(),
           getLocations()
         ])
 
-        setSearchHistory(historyData)
-        setFilteredHistory(historyData)
         setBusinessCategories(categoriesData)
         setLocations(locationsData)
+
+        // Load first page of history
+        await loadHistoryData(1, itemsPerPage)
       } catch (err) {
-        console.error('Error loading history:', err)
-        setError('Failed to load search history')
+        console.error('Error loading data:', err)
+        setError('Failed to load data')
       } finally {
         setIsLoading(false)
       }
@@ -184,6 +214,59 @@ const HistoryPage = () => {
     setDateFilter("")
   }
 
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      loadHistoryData(newPage, itemsPerPage)
+    }
+  }
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage)
+    setCurrentPage(1)
+    loadHistoryData(1, newItemsPerPage)
+  }
+
+  // Shows intelligent pagination with ellipsis
+  const getPageNumbers = () => {
+    const pages = []
+    const maxVisiblePages = 5
+
+    if (totalPages <= maxVisiblePages) {
+      // Show all pages if total is small
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      // Show smart pagination with ellipsis
+      if (currentPage <= 3) {
+        // Near start: 1, 2, 3, 4, ..., 15
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i)
+        }
+        pages.push('...')
+        pages.push(totalPages)
+      } else if (currentPage >= totalPages - 2) {
+        // Near end: 1, ..., 12, 13, 14, 15
+        pages.push(1)
+        pages.push('...')
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i)
+        }
+      } else {
+        // Middle: 1, ..., 7, 8, 9, ..., 15
+        pages.push(1)
+        pages.push('...')
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i)
+        }
+        pages.push('...')
+        pages.push(totalPages)
+      }
+    }
+
+    return pages
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-main">
@@ -236,7 +319,7 @@ const HistoryPage = () => {
                   <History className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <div className="text-3xl font-normal text-primary">{filteredHistory.length}</div>
+                  <div className="text-3xl font-normal text-primary">{totalItems}</div>
                   <div className="text-sm text-secondary font-normal">Total Searches</div>
                 </div>
               </div>
@@ -278,7 +361,7 @@ const HistoryPage = () => {
                   type="date"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
-                  className="h-12 bg-card border-gray-300 font-normal text-primary w-1/2"
+                  className="w-1/2 h-12 bg-card border-gray-300 font-normal text-primary"
                 />
               </div>
 
@@ -293,6 +376,28 @@ const HistoryPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Items per page selector */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <label className="text-sm font-normal text-primary">Items per page:</label>
+            <Select value={itemsPerPage.toString()} onValueChange={(value) => handleItemsPerPageChange(Number(value))}>
+              <SelectTrigger className="w-20 h-8 bg-card border-gray-300 font-normal text-primary">
+                <SelectValue placeholder={itemsPerPage.toString()} />
+              </SelectTrigger>
+              <SelectContent className="bg-card">
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="text-sm text-secondary font-normal">
+            Showing {startItem}-{endItem} of {totalItems} results
+          </div>
+        </div>
 
         {filteredHistory.length === 0 ? (
           <Card className="border-0 shadow-none bg-card">
@@ -317,122 +422,178 @@ const HistoryPage = () => {
             </CardContent>
           </Card>
         ) : (
-          <Card className="border-0 shadow-none bg-card">
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-b border-gray-200">
-                      <TableHead className="font-medium text-primary p-6">Query</TableHead>
-                      <TableHead className="font-medium text-primary p-6">Location</TableHead>
-                      <TableHead className="font-medium text-primary p-6">Category</TableHead>
-                      <TableHead className="font-medium text-primary p-6">Max Results</TableHead>
-                      <TableHead className="font-medium text-primary p-6">Search Options</TableHead>
-                      <TableHead className="font-medium text-primary p-6">Status</TableHead>
-                      <TableHead className="font-medium text-primary p-6">Created At</TableHead>
-                      <TableHead className="font-medium text-primary p-6">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredHistory.map((search, index) => {
-                      const isRunning = search.status === "RUNNING"
-                      return (
-                        <TableRow
-                          key={index}
-                          className={`border-b border-gray-200 hover:bg-gray-50 transition-all duration-200 ${
-                            isRunning ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-                          }`}
-                        >
-                          <TableCell className="p-6">
-                            <div className="font-medium text-primary">{search.query}</div>
-                          </TableCell>
-                          <TableCell className="p-6">
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4 text-secondary" />
-                              <span className="text-primary font-normal">
-                                {getLocationName(search.location_id)}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="p-6">
-                            <div className="flex items-center gap-2">
-                              <Building2 className="h-4 w-4 text-secondary" />
-                              <span className="text-primary font-normal">
-                                {getBusinessCategoryName(search.category_id)}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="p-6">
-                            <div className="text-primary font-normal">{search.max_results}</div>
-                          </TableCell>
-                          <TableCell className="p-6">
-                            <div className="flex items-center gap-2">
-                              {search.search_google ? (
-                                <Check className="h-4 w-4 text-green-600" />
-                              ) : (
-                                <X className="h-4 w-4 text-red-600" />
-                              )}
-                              <span className="text-sm text-secondary">Google</span>
+          <>
+            <Card className="border-0 shadow-none bg-card mb-6">
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b border-gray-200">
+                        <TableHead className="font-medium text-primary p-6">Query</TableHead>
+                        <TableHead className="font-medium text-primary p-6">Location</TableHead>
+                        <TableHead className="font-medium text-primary p-6">Category</TableHead>
+                        <TableHead className="font-medium text-primary p-6">Max Results</TableHead>
+                        <TableHead className="font-medium text-primary p-6">Search Options</TableHead>
+                        <TableHead className="font-medium text-primary p-6">Status</TableHead>
+                        <TableHead className="font-medium text-primary p-6">Created At</TableHead>
+                        <TableHead className="font-medium text-primary p-6">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredHistory.map((search, index) => {
+                        const isRunning = search.status === "RUNNING"
+                        return (
+                          <TableRow
+                            key={index}
+                            className={`border-b border-gray-200 hover:bg-gray-50 transition-all duration-200 ${
+                              isRunning ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                            }`}
+                          >
+                            <TableCell className="p-6">
+                              <div className="font-medium text-primary">{search.query}</div>
+                            </TableCell>
+                            <TableCell className="p-6">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-secondary" />
+                                <span className="text-primary font-normal">
+                                  {getLocationName(search.location_id)}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="p-6">
+                              <div className="flex items-center gap-2">
+                                <Building2 className="h-4 w-4 text-secondary" />
+                                <span className="text-primary font-normal">
+                                  {getBusinessCategoryName(search.category_id)}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="p-6">
+                              <div className="text-primary font-normal">{search.max_results}</div>
+                            </TableCell>
+                            <TableCell className="p-6">
+                              <div className="flex items-center gap-2">
+                                {search.search_google ? (
+                                  <Check className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <X className="h-4 w-4 text-red-600" />
+                                )}
+                                <span className="text-sm text-secondary">Google</span>
 
-                              {search.search_local ? (
-                                <Check className="h-4 w-4 text-green-600" />
-                              ) : (
-                                <X className="h-4 w-4 text-red-600" />
-                              )}
-                              <span className="text-sm text-secondary">Local</span>
+                                {search.search_local ? (
+                                  <Check className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <X className="h-4 w-4 text-red-600" />
+                                )}
+                                <span className="text-sm text-secondary">Local</span>
 
-                              {search.search_maps ? (
-                                <Check className="h-4 w-4 text-green-600" />
-                              ) : (
-                                <X className="h-4 w-4 text-red-600" />
-                              )}
-                              <span className="text-sm text-secondary">Maps</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="p-6">
-                            {getStatusBadge(search.status)}
-                          </TableCell>
-                          <TableCell className="p-6">
-                            <div className="text-secondary font-normal text-sm">
-                              {formatDate(search.created_at)}
-                            </div>
-                          </TableCell>
-                          <TableCell className="p-6">
-                            <div className="flex gap-2">
-                              {search.status !== "RUNNING" && (
-                                <Button
-                                  onClick={() => handleReRunSearch(search)}
-                                  disabled={isReRunning}
-                                  className="bg-green-100 hover:bg-green-200 text-green-800 font-normal rounded-none text-sm px-3 py-2 disabled:opacity-50"
-                                >
-                                  {isReRunning ? (
-                                    <div className="flex items-center">
-                                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-800 mr-1" />
-                                      <span>Running...</span>
-                                    </div>
-                                  ) : (
-                                    <>
-                                      <RefreshCw className="mr-1 h-3 w-3" />
-                                      Re-run
-                                    </>
-                                  )}
-                                </Button>
-                              )}
-                              {search.status === "RUNNING" && (
-                                <Badge className="bg-blue-100 text-blue-800 px-3 py-1 font-normal rounded-none">
-                                  In Progress
-                                </Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+                                {search.search_maps ? (
+                                  <Check className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <X className="h-4 w-4 text-red-600" />
+                                )}
+                                <span className="text-sm text-secondary">Maps</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="p-6">
+                              {getStatusBadge(search.status)}
+                            </TableCell>
+                            <TableCell className="p-6">
+                              <div className="text-secondary font-normal text-sm">
+                                {formatDate(search.created_at)}
+                              </div>
+                            </TableCell>
+                            <TableCell className="p-6">
+                              <div className="flex gap-2">
+                                {search.status !== "RUNNING" && (
+                                  <Button
+                                    onClick={() => handleReRunSearch(search)}
+                                    disabled={isReRunning}
+                                    className="bg-green-100 hover:bg-green-200 text-green-800 font-normal rounded-none text-sm px-3 py-2 disabled:opacity-50"
+                                  >
+                                    {isReRunning ? (
+                                      <div className="flex items-center">
+                                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-800 mr-1" />
+                                        <span>Running...</span>
+                                      </div>
+                                    ) : (
+                                      <>
+                                        <RefreshCw className="mr-1 h-3 w-3" />
+                                        Re-run
+                                      </>
+                                    )}
+                                  </Button>
+                                )}
+                                {search.status === "RUNNING" && (
+                                  <Badge className="bg-blue-100 text-blue-800 px-3 py-1 font-normal rounded-none">
+                                    In Progress
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <Card className="border-0 shadow-none bg-card">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="bg-card border border-gray-300 text-primary hover:bg-gray-50 font-normal rounded-none px-3 py-2 disabled:opacity-50"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Previous
+                      </Button>
+
+                      <div className="flex items-center gap-1">
+                        {getPageNumbers().map((page, index) => (
+                          <div key={index}>
+                            {page === '...' ? (
+                              <span className="px-3 py-2 text-secondary">...</span>
+                            ) : (
+                              <Button
+                                onClick={() => handlePageChange(page)}
+                                className={`px-3 py-2 font-normal rounded-none ${
+                                  currentPage === page
+                                    ? 'bg-black text-white'
+                                    : 'bg-card border border-gray-300 text-primary hover:bg-gray-50'
+                                }`}
+                              >
+                                {page}
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      <Button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="bg-card border border-gray-300 text-primary hover:bg-gray-50 font-normal rounded-none px-3 py-2 disabled:opacity-50"
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="text-sm text-secondary font-normal">
+                      Page {currentPage} of {totalPages}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
       </div>
     </div>
