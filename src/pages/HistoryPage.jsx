@@ -9,16 +9,12 @@ import { Badge } from "@/components/ui/Badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
 import { MapPin, Building2, Users, Download, RefreshCw, Eye, Trash2, History, Check, X, Search, Clock, Play, Filter, ChevronLeft, ChevronRight } from "lucide-react"
 import { getSearchHistory } from "@/services/search_history"
-import { getBusinessCategories } from "@/services/business_categories"
-import { getLocations } from "@/services/locations"
 import api from "@/services/api"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 
 const HistoryPage = () => {
   const [searchHistory, setSearchHistory] = useState([])
   const [filteredHistory, setFilteredHistory] = useState([])
-  const [businessCategories, setBusinessCategories] = useState([])
-  const [locations, setLocations] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -60,15 +56,7 @@ const HistoryPage = () => {
     const loadData = async () => {
       try {
         setIsLoading(true)
-        const [categoriesData, locationsData] = await Promise.all([
-          getBusinessCategories(),
-          getLocations()
-        ])
-
-        setBusinessCategories(categoriesData)
-        setLocations(locationsData)
-
-        // Load first page of history
+        // Load first page of history - no need to load categories and locations
         await loadHistoryData(1, itemsPerPage)
       } catch (err) {
         console.error('Error loading data:', err)
@@ -101,16 +89,6 @@ const HistoryPage = () => {
 
     setFilteredHistory(filtered)
   }, [searchHistory, queryFilter, dateFilter])
-
-  const getBusinessCategoryName = (categoryId) => {
-    const category = businessCategories.find(cat => cat.id === categoryId)
-    return category ? category.name : `Category ${categoryId}`
-  }
-
-  const getLocationName = (locationId) => {
-    const location = locations.find(loc => loc.id === locationId)
-    return location ? location.name : `Location ${locationId}`
-  }
 
   const getStatusBadge = (status) => {
     const statusConfig = {
@@ -155,6 +133,11 @@ const HistoryPage = () => {
         search_maps: searchParams.search_maps,
       }
 
+      // Add category_id if present
+      if (searchParams.category_id) {
+        searchConfig.category_id = searchParams.category_id
+      }
+
       // Call the same API as SearchPage
       const response = await api.post("/search/execute", searchConfig)
       console.log('Re-run search response:', response)
@@ -188,12 +171,12 @@ const HistoryPage = () => {
       ...filteredHistory.map((search) =>
         [
           `"${search.query}"`,
-          `"${getLocationName(search.location_id)}"`,
+          `"${search.location_formatted}"`,
           search.max_results,
           search.search_google ? "Yes" : "No",
           search.search_local ? "Yes" : "No",
           search.search_maps ? "Yes" : "No",
-          `"${getBusinessCategoryName(search.category_id)}"`,
+          `"${search.category_name}"`,
           `"${search.status}"`,
           `"${formatDate(search.created_at)}"`
         ].join(",")
@@ -361,7 +344,7 @@ const HistoryPage = () => {
                   type="date"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
-                  className="w-1/2 h-12 bg-card border-gray-300 font-normal text-primary"
+                  className="h-12 bg-card border-gray-300 font-normal text-primary"
                 />
               </div>
 
@@ -450,13 +433,15 @@ const HistoryPage = () => {
                             }`}
                           >
                             <TableCell className="p-6">
-                              <div className="font-medium text-primary">{search.query}</div>
+                              <div className="font-medium text-primary">
+                                {search.query || "No query"}
+                              </div>
                             </TableCell>
                             <TableCell className="p-6">
                               <div className="flex items-center gap-2">
                                 <MapPin className="h-4 w-4 text-secondary" />
                                 <span className="text-primary font-normal">
-                                  {getLocationName(search.location_id)}
+                                  {search.location_formatted}
                                 </span>
                               </div>
                             </TableCell>
@@ -464,7 +449,7 @@ const HistoryPage = () => {
                               <div className="flex items-center gap-2">
                                 <Building2 className="h-4 w-4 text-secondary" />
                                 <span className="text-primary font-normal">
-                                  {getBusinessCategoryName(search.category_id)}
+                                  {search.category_name}
                                 </span>
                               </div>
                             </TableCell>
