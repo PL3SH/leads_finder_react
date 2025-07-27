@@ -73,25 +73,25 @@ const LeadDetailPage = () => {
     if (is_maps_search) {
       return <Map className="h-5 w-5" />;
     }
-    
-  
+
+
     // Solo Google Maps
     if (is_maps_search) {
       return <Map className="h-5 w-5" />;
     }
-  
+
     // Solo Google Search
     if (is_google_search) {
       return <SearchIcon className="h-5 w-5" />;
     }
-  
+
     // Solo Local Search (si quieres mostrar algo especial)
     if (is_local_search) {
       // Puedes usar otro icono, por ejemplo Briefcase, o un Badge
       return <Briefcase className="h-5 w-5" />;
       // O simplemente: return <span>Local</span>;
     }
-  
+
     // Si ninguno es true
     return null;
   };
@@ -113,7 +113,7 @@ const LeadDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-main">
-      <div className="max-w-6xl mx-auto px-8 py-12">
+      <div className="max-w-10xl mx-auto px-8 py-12">
         {/* Header */}
         <div className="mb-12">
           <Button
@@ -193,7 +193,7 @@ const LeadDetailPage = () => {
                             <Globe className="h-6 w-6 text-purple-600" />
                           </div>
                           <div>
-                            
+
                             <a
                               href={lead.website}
                               target="_blank"
@@ -280,7 +280,7 @@ const LeadDetailPage = () => {
               </CardContent>
             </Card>
             {/* Outreach Script */}
-            
+
           </div>
 
           {/* Additional Information */}
@@ -297,7 +297,7 @@ const LeadDetailPage = () => {
                 <p> TBT: {lead.metrics?.tbt || 0}/100</p>
                 <p> TTI: {lead.metrics?.tti || 0}/100</p>
                </div>
-              
+
                </div>
               </CardContent>
             </Card>
@@ -310,7 +310,7 @@ const LeadDetailPage = () => {
                   <div className="flex items-center gap-4 mb-6">
                     <div className="text-4xl font-bold text-primary">{lead.metrics?.seo_score || 0}/100</div>
                     <div className="flex-1 bg-gray-200 h-3 rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className="bg-gradient-to-r from-blue-500 to-green-500 h-full rounded-full transition-all duration-300"
                         style={{ width: `${lead.metrics?.seo_score || 0}%` }}
                       ></div>

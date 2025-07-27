@@ -11,8 +11,6 @@ import { Card, CardContent } from "@/components/ui/Card"
 import { Search, MapPin, Building2, Hash, Target } from "lucide-react"
 import { getBusinessCategories } from "@/services/business_categories"
 import { getCities } from "@/services/cities"
-import { searchStorage } from "@/lib/storage"
-import { set } from "date-fns/set"
 
 const SearchPage = () => {
   const navigate = useNavigate()
@@ -52,7 +50,7 @@ const SearchPage = () => {
       search_maps: true,
     }
     const response = await api.post("/search/execute", searchParams)
-    
+
     console.log('Response:  ' , response)
     setTimeout(() => {
       setIsSearching(false)
@@ -64,7 +62,7 @@ const SearchPage = () => {
 
   return (
     <div className="min-h-screen bg-main">
-      <div className="max-w-6xl mx-auto px-8 py-12">
+      <div className="max-w-10xl mx-auto px-8 py-12">
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-5xl font-normal text-primary mb-6 leading-tight">Find Your Next Business Leads</h1>
@@ -139,11 +137,9 @@ const SearchPage = () => {
                     Businesses to Crawl
                   </Label>
                   <Input
-                    type="number"
-                    min="1"
-                    max="500"
+                    type="text"
                     value={numberOfBusinesses}
-                    onChange={(e) => setNumberOfBusinesses(Number.parseInt(e.target.value) || 50)}
+                    onChange={(e) => setNumberOfBusinesses(e.target.value)}
                     className="h-12 bg-card border-gray-300 font-normal text-primary"
                     placeholder="50"
                   />
