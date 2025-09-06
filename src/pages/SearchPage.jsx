@@ -11,8 +11,6 @@ import { Card, CardContent } from "@/components/ui/Card"
 import { Search, MapPin, Building2, Hash, Target } from "lucide-react"
 import { getBusinessCategories } from "@/services/business_categories"
 import { getCities } from "@/services/cities"
-import { searchStorage } from "@/lib/storage"
-import { set } from "date-fns/set"
 
 const SearchPage = () => {
   const navigate = useNavigate()
@@ -26,7 +24,7 @@ const SearchPage = () => {
   const [cities, setCities] = useState([])
   const [businessCategories, setBusinessCategories] = useState([])
 
-  // 2. Variables derivadas
+  // Get the display name for business category
   const businessCategoryName = businessCategories.find((bc) => bc.id === selectedBusinessCategories[0])?.name || "Select business type"
   const selectedCityName = cities.find(city => city.location_id === selectedCities[0])?.formatted_name || "Select location";
 
@@ -39,7 +37,6 @@ const SearchPage = () => {
   }, [])
 
   const handleSearch = async () => {
-
     setIsSearching(true)
 
     // Create search parameters
@@ -51,16 +48,20 @@ const SearchPage = () => {
       search_local: false,
       search_maps: true,
     }
+
+    // Add category_id if a business category is selected
+    if (selectedBusinessCategories[0]) {
+      searchParams.category_id = selectedBusinessCategories[0]
+    }
+
     const response = await api.post("/search/execute", searchParams)
-    
+
     console.log('Response:  ' , response)
     setTimeout(() => {
       setIsSearching(false)
     }, 3000)
     return
-
   }
-
 
   return (
     <div className="min-h-screen bg-main">

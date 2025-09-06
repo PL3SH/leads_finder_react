@@ -13,15 +13,13 @@ import {
   MapPin,
   Star,
   ArrowLeft,
-  Download,
-  MessageSquare,
   Map,
   SearchIcon,
-  Lightbulb,
   User,
   Clock,
   Briefcase,
   Brain,
+  Eye,
   Chrome
 } from "lucide-react"
 import {  leadTypes } from "@/lib/data"
@@ -73,25 +71,25 @@ const LeadDetailPage = () => {
     if (is_maps_search) {
       return <Map className="h-5 w-5" />;
     }
-    
-  
+
+
     // Solo Google Maps
     if (is_maps_search) {
       return <Map className="h-5 w-5" />;
     }
-  
+
     // Solo Google Search
     if (is_google_search) {
       return <SearchIcon className="h-5 w-5" />;
     }
-  
+
     // Solo Local Search (si quieres mostrar algo especial)
     if (is_local_search) {
       // Puedes usar otro icono, por ejemplo Briefcase, o un Badge
       return <Briefcase className="h-5 w-5" />;
       // O simplemente: return <span>Local</span>;
     }
-  
+
     // Si ninguno es true
     return null;
   };
@@ -110,10 +108,15 @@ const LeadDetailPage = () => {
     }
     return "Unknown"
   }
-
+  const zoho_insert_lead = () => {
+    console.log("insert lead")
+  }
+  const zoho_remove_lead = () => {
+    console.log("remove lead")
+  }
   return (
     <div className="min-h-screen bg-main">
-      <div className="max-w-6xl mx-auto px-8 py-12">
+      <div className="max-w-10xl mx-auto px-8 py-12">
         {/* Header */}
         <div className="mb-12">
           <Button
@@ -170,20 +173,24 @@ const LeadDetailPage = () => {
                             <h3 className="text-xl font-normal text-primary">Phone</h3>
                             <ul className="text-secondary font-normal hover:text-primary">
                               {lead.phones.map((phone) => (
-                                <li key={phone}>{phone}</li>
+                                <li key={phone}><a href={`tel:${phone}`}>{phone}</a></li>
                               ))}
                             </ul>
                           </div>
                         </div>
                       )}
-                      {lead.emails && (
+                      {lead.emails.length > 0 && (
                         <div className="flex items-center gap-4">
                           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
                             <Mail className="h-6 w-6 text-green-600" />
                           </div>
                           <div>
                             <h3 className="text-xl font-normal text-primary">Email</h3>
-                            <p className="text-secondary font-normal">{lead.emails}</p>
+                            <ul className="text-secondary font-normal hover:text-primary">
+                              {lead.emails.map((email) => (
+                                <li key={email}><a href={`mailto:${email}`}>{email}</a></li>
+                              ))}
+                            </ul>
                           </div>
                         </div>
                       )}
@@ -193,7 +200,7 @@ const LeadDetailPage = () => {
                             <Globe className="h-6 w-6 text-purple-600" />
                           </div>
                           <div>
-                            
+
                             <a
                               href={lead.website}
                               target="_blank"
@@ -279,25 +286,41 @@ const LeadDetailPage = () => {
                 </div>
               </CardContent>
             </Card>
-            {/* Outreach Script */}
-            
           </div>
-
-          {/* Additional Information */}
           <div className="space-y-8">
             {/* Performance metrics  */}
             <Card className="border-0 shadow-none bg-card">
               <CardContent className="p-8">
                <p className="text-2xl font-normal text-primary mb-4">Performance metrics</p>
                <div className="flex items-center gap-4 mb-6">
-               <div className=" font-normal ">
-                <p> CLS: {lead.metrics?.cls || 0}/100</p>
-                <p> FCP: {lead.metrics?.fcp || 0}/100</p>
-                <p> LCP: {lead.metrics?.lcp || 0}/100</p>
-                <p> TBT: {lead.metrics?.tbt || 0}/100</p>
-                <p> TTI: {lead.metrics?.tti || 0}/100</p>
+               <div className="space-y-2">
+               <p className="font-normal">Cumulative Layout Shift</p>
+                <div className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  <p className="font-normal">CLS: {parseFloat(lead.metrics?.cls || 0).toFixed(2)}/1</p>
+                </div>
+                <p className="font-normal">First Contentful Paint</p>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <p className="font-normal">FCP: {parseFloat(lead.metrics?.fcp || 0).toFixed(2)} Sec</p>
+                </div>
+                <p className="font-normal">Largest Contentful Paint</p>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <p className="font-normal">LCP: {parseFloat(lead.metrics?.lcp || 0).toFixed(2)} Sec</p>
+                </div>
+                <p className="font-normal">Total Blocking Time</p>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <p className="font-normal">TBT: {parseFloat(lead.metrics?.tbt || 0).toFixed(2)} ms</p>
+                </div>
+                <p className="font-normal">Time to Interactive</p>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <p className="font-normal">TTI: {parseFloat(lead.metrics?.tti || 0).toFixed(2)} Sec</p>
+                </div>
                </div>
-              
+
                </div>
               </CardContent>
             </Card>
@@ -311,7 +334,7 @@ const LeadDetailPage = () => {
                     <div className="text-4xl font-bold text-primary">{lead.metrics?.seo_score || 0}/100</div>
                     <div className="flex-1 bg-gray-200 h-3 rounded-full overflow-hidden">
                       <div 
-                        className="bg-gradient-to-r from-blue-500 to-green-500 h-full rounded-full transition-all duration-300"
+                        className="bg-gradient-to-r from-red-500 to-yellow-500  to-green-300 to-green-500 h-full rounded-full transition-all duration-300"
                         style={{ width: `${lead.metrics?.seo_score || 0}%` }}
                       ></div>
                     </div>
@@ -329,17 +352,17 @@ const LeadDetailPage = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-primary">Accessibility Score</span>
-                    <span className="text-sm font-medium text-green-600">{lead.metrics?.accessibility_score || 0}/100</span>
+                    <span className="text-sm font-medium text-yellow-600">{lead.metrics?.accessibility_score || 0}/100</span>
                   </div>
                   <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                    <div className="bg-green-500 h-full rounded-full" style={{ width: `${lead.metrics?.accessibility_score || 0}%` }}></div>
+                    <div className="bg-yellow-500 h-full rounded-full" style={{ width: `${lead.metrics?.accessibility_score || 0}%` }}></div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-primary">Best practices Score</span>
-                    <span className="text-sm font-medium text-green-600">{lead.metrics?.best_practices_score || 0}/100</span>
+                    <span className="text-sm font-medium text-red-600">{lead.metrics?.best_practices_score || 0}/100</span>
                   </div>
                   <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                    <div className="bg-green-500 h-full rounded-full" style={{ width: `${lead.metrics?.best_practices_score || 0}%` }}></div>
+                    <div className="bg-red-500 h-full rounded-full" style={{ width: `${lead.metrics?.best_practices_score || 0}%` }}></div>
                   </div>
                 </div>
 
@@ -352,9 +375,15 @@ const LeadDetailPage = () => {
             </Card>
             <Card className="border-0 shadow-none bg-card">
               <CardContent className="p-8">
-                <Button className="bg-black hover:bg-gray-800 text-white font-normal rounded-none">
-                  <p>Add to Zoho</p>
-                </Button>
+                {lead.in_zoho_crm == true ? (
+                  <Button className="bg-black hover:bg-gray-800 text-white font-normal rounded-none" onClick={zoho_remove_lead}>
+                    <p>Remove from Zoho</p>
+                  </Button>
+                ) : (
+                  <Button className="bg-black hover:bg-gray-800 text-white font-normal rounded-none" onClick={zoho_insert_lead}>
+                    <p>Add to Zoho</p>
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>
