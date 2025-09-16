@@ -476,14 +476,6 @@ const LeadsPage = () => {
                                   Details
                                 </Button>
                               </Link>
-                              {!lead.isInZoho && (
-                                <Button
-                                  onClick={() => handleExportToZoho(lead.id)}
-                                  className="bg-green-100 hover:bg-green-200 text-green-800 font-normal rounded-none text-sm px-3 py-2"
-                                >
-                                  Add to Zoho
-                                </Button>
-                              )}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -622,22 +614,6 @@ const LeadsPage = () => {
                             View Details
                           </Button>
                         </Link>
-                        {!lead.isInZoho ? (
-                          <Button
-                            onClick={() => handleExportToZoho(lead.id)}
-                            className="w-full bg-green-100 hover:bg-green-200 text-green-800 font-normal rounded-none"
-                          >
-                            Add to Zoho
-                          </Button>
-                        ) : (
-                          <Button
-                            disabled
-                            className="w-full bg-gray-100 text-gray-500 font-normal rounded-none cursor-not-allowed"
-                          >
-                            <Check className="mr-2 h-4 w-4" />
-                            In Zoho
-                          </Button>
-                        )}
                       </div>
                     </div>
                   </CardContent>
