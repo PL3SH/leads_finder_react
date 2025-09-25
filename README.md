@@ -6,6 +6,9 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue?style=for-the-badge&logo=postgresql)](https://postgresql.org/)
 
 ## 📋 Overview
+<img width="1892" height="956" alt="image" src="https://github.com/user-attachments/assets/269aea7d-9812-4ce3-85a2-2afd33e0c281" />
+<img width="1917" height="957" alt="image" src="https://github.com/user-attachments/assets/904ada14-dd92-491a-a90b-bbdd51036756" />
+<img width="1848" height="944" alt="image" src="https://github.com/user-attachments/assets/f7f8e586-d18d-4db2-9980-02136875d2fd" />
 
 **Leads Finder** is an intelligent web quality assessment platform that combines SERP API data, PageSpeed Insights metrics, and AI-powered analysis to help SEO and marketing teams identify potential clients who need website optimization services.
 
