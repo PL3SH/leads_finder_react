@@ -38,14 +38,14 @@ const LeadDetailPage = () => {
   if (!lead) {
     return (
       <div className="min-h-screen bg-main">
-        <div className="max-w-4xl mx-auto px-8 py-12 text-center">
-          <h1 className="text-3xl font-normal text-primary mb-6">Lead Not Found</h1>
-          <p className="text-lg text-secondary font-normal mb-8">
+        <div className="max-w-4xl mx-auto p-macos-lg text-center">
+          <h1 className="text-largetitle macos-text-primary mb-macos-md">Lead Not Found</h1>
+          <p className="text-body macos-text-secondary mb-macos-lg">
             The lead you're looking for doesn't exist or may have been removed.
           </p>
           <Button
             onClick={() => navigate(-1)}
-            className="bg-black hover:bg-gray-800 text-white font-normal rounded-none"
+            variant="outline"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Go Back
@@ -108,105 +108,120 @@ const LeadDetailPage = () => {
     }
     return "Unknown"
   }
-  const zoho_insert_lead = () => {
-    console.log("insert lead")
-  }
-  const zoho_remove_lead = () => {
-    console.log("remove lead")
-  }
   return (
-    <div className="min-h-screen bg-main">
-      <div className="max-w-10xl mx-auto px-8 py-12">
+    <div className="min-h-screen bg-main relative overflow-hidden">
+      {/* Background Floating Elements */}
+      <div className="floating-element-1"></div>
+      <div className="floating-element-2"></div>
+      <div className="floating-element-3"></div>
+      <div className="geo-shape-1"></div>
+      <div className="geo-shape-2"></div>
+      
+      {/* Floating Particles */}
+      <div className="floating-particles">
+        <div className="particle particle-1"></div>
+        <div className="particle particle-2"></div>
+        <div className="particle particle-3"></div>
+        <div className="particle particle-4"></div>
+        <div className="particle particle-5"></div>
+        <div className="particle particle-6"></div>
+        <div className="particle particle-7"></div>
+        <div className="particle particle-8"></div>
+        <div className="particle particle-9"></div>
+      </div>
+      
+      <div className="max-w-7xl mx-auto p-macos-lg relative depth-neutral">
         {/* Header */}
-        <div className="mb-12">
+        <div className="mb-macos-2xl">
           <Button
             onClick={() => navigate(-1)}
-            className="mb-8 bg-card border border-black text-primary hover:bg-gray-50 font-normal rounded-none"
+            variant="outline"
+            className="mb-macos-lg"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Results
           </Button>
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-5xl font-normal text-primary mb-4 leading-tight">{lead.businessName}</h1>
-              <p className="text-xl text-secondary font-normal">{lead.category}</p>
+              <h1 className="text-largetitle glass-text-primary mb-macos-sm ultra-sharp relative depth-top">{lead.businessName}</h1>
+              <p className="text-title3 glass-text-secondary ultra-sharp">{lead.category}</p>
             </div>
-            <div className="flex items-center gap-4">
-              <Badge className={`${leadTypeInfo.color} px-4 py-2 text-sm font-normal rounded-none`}>
+            <div className="flex items-center gap-macos-sm">
+              <Badge className={`${leadTypeInfo.color} px-macos-sm py-macos-xs text-footnote rounded-2xl backdrop-filter backdrop-blur-md border border-white/20`}>
                 {leadTypeInfo.label}
               </Badge>
-              <div className="flex items-center gap-2 bg-yellow-100 px-4 py-3 rounded-none">
-                <Star className="h-6 w-6 text-yellow-600" />
-                <span className="text-2xl font-medium text-primary">{lead.score || "NA"}</span>
+              <div className="flex items-center gap-2 glass-bg-accent px-macos-sm py-macos-xs rounded-2xl border glass-border backdrop-filter backdrop-blur-md">
+                <Star className="h-5 w-5" style={{color: 'var(--glass-orange)'}} />
+                <span className="text-title3 glass-text-primary">{lead.score || "NA"}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-macos-lg relative depth-front">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-macos-lg relative depth-mid-front">
             {/* Business Information */}
-            <Card className="border-0 shadow-none bg-card">
-              <CardContent className="p-8">
-                <div className="mb-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                      <User className="h-5 w-5 text-blue-600" />
+            <Card className="card-glass backdrop-blur-4xl glass-shadow-strong relative depth-front">
+              <CardContent className="p-macos-lg">
+                <div className="mb-macos-lg">
+                  <div className="flex items-center gap-macos-sm mb-macos-sm">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full glass-icon-container glass-bg-accent backdrop-blur-4xl border glass-border glass-shadow-medium">
+                      <User className="h-5 w-5 glass-text-secondary" />
                     </div>
-                    <h2 className="text-2xl font-normal text-primary">Business Information</h2>
+                    <h2 className="text-title2 glass-text-primary ultra-sharp">Business Information</h2>
                   </div>
-                  <p className="text-secondary font-normal">
+                  <p className="text-body glass-text-secondary">
                      {lead.snippet || "No description available"}
                   </p>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-6">
+                <div className="space-y-macos-md">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-macos-lg">
+                    <div className="space-y-macos-md">
                       {lead.phones && (
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-                            <Phone className="h-6 w-6 text-blue-600" />
+                        <div className="flex items-center gap-macos-sm">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full glass-icon-container glass-bg-accent backdrop-blur-4xl border glass-border glass-shadow-light">
+                            <Phone className="h-5 w-5 glass-text-secondary" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-normal text-primary">Phone</h3>
-                            <ul className="text-secondary font-normal hover:text-primary">
+                            <h3 className="text-headline glass-text-primary">Phone</h3>
+                            <ul className="text-body glass-text-secondary">
                               {lead.phones.map((phone) => (
-                                <li key={phone}><a href={`tel:${phone}`}>{phone}</a></li>
+                                <li key={phone}><a className="hover:underline transition-all duration-200">{phone}</a></li>
                               ))}
                             </ul>
                           </div>
                         </div>
                       )}
                       {lead.emails.length > 0 && (
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                            <Mail className="h-6 w-6 text-green-600" />
+                        <div className="flex items-center gap-macos-sm">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full glass-icon-container glass-bg-accent backdrop-blur-4xl border glass-border glass-shadow-light">
+                            <Mail className="h-5 w-5 glass-text-secondary" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-normal text-primary">Email</h3>
-                            <ul className="text-secondary font-normal hover:text-primary">
+                            <h3 className="text-headline glass-text-primary">Email</h3>
+                            <ul className="text-body glass-text-secondary">
                               {lead.emails.map((email) => (
-                                <li key={email}><a href={`mailto:${email}`}>{email}</a></li>
+                                <li key={email}><a href={`mailto:${email}`} className="hover:underline transition-all duration-200" style={{color: 'var(--glass-blue)'}}>{email}</a></li>
                               ))}
                             </ul>
                           </div>
                         </div>
                       )}
                       {lead.website && (
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100">
-                            <Globe className="h-6 w-6 text-purple-600" />
+                        <div className="flex items-center gap-macos-sm">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full glass-icon-container glass-bg-accent backdrop-blur-4xl border glass-border glass-shadow-light">
+                            <Globe className="h-5 w-5 glass-text-secondary" />
                           </div>
                           <div>
-
+                            <h3 className="text-headline glass-text-primary mb-2">Website</h3>
                             <a
                               href={lead.website}
                               target="_blank"
                               rel="noopener noreferrer"
                             >
-                              <Button className="bg-black hover:bg-gray-800 text-white font-normal rounded-20px">
+                              <Button size="sm" className="glass-glow hover:glass-glow">
                                 Visit Website
                               </Button>
                             </a>
@@ -214,48 +229,48 @@ const LeadDetailPage = () => {
                         </div>
                       )}
                       {lead.address && (
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                            <MapPin className="h-6 w-6 text-red-600" />
+                        <div className="flex items-center gap-macos-sm">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full glass-bg-accent backdrop-filter backdrop-blur-md border glass-border">
+                            <MapPin className="h-5 w-5 glass-text-secondary" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-normal text-primary">Address</h3>
-                            <p className="text-secondary font-normal">{lead.address}</p>
+                            <h3 className="text-headline glass-text-primary">Address</h3>
+                            <p className="text-body glass-text-secondary">{lead.address}</p>
                           </div>
                         </div>
                       )}
                     </div>
-                    <div className="space-y-6">
+                    <div className="space-y-macos-md">
                     {lead.city && (
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                            <MapPin className="h-6 w-6 text-red-600" />
+                        <div className="flex items-center gap-macos-sm">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full glass-bg-accent backdrop-filter backdrop-blur-md border glass-border">
+                            <MapPin className="h-5 w-5 glass-text-secondary" />
                           </div>
                           <div>
-                              <h3 className="text-xl font-normal text-primary">Location</h3>
-                              <p className="text-secondary font-normal">{lead.city}, {lead.state}, {lead.country}</p>
+                              <h3 className="text-headline glass-text-primary">Location</h3>
+                              <p className="text-body glass-text-secondary">{lead.city}, {lead.state}, {lead.country}</p>
                           </div>
                         </div>
                       )}
                       {(lead.is_maps_search || lead.is_google_search) && (
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
-                            {getSourceIcon(lead.is_google_search, lead.is_maps_search, lead.is_local_search)}
+                        <div className="flex items-center gap-macos-sm">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full glass-bg-accent backdrop-filter backdrop-blur-md border glass-border">
+                            <div className="glass-text-secondary">{getSourceIcon(lead.is_google_search, lead.is_maps_search, lead.is_local_search)}</div>
                           </div>
                           <div>
-                            <h3 className="text-xl font-normal text-primary">Source</h3>
-                            <p className="text-secondary font-normal">{getSourceLabel(lead.is_google_search, lead.is_maps_search, lead.is_local_search)}</p>
+                            <h3 className="text-headline glass-text-primary">Source</h3>
+                            <p className="text-body glass-text-secondary">{getSourceLabel(lead.is_google_search, lead.is_maps_search, lead.is_local_search)}</p>
                           </div>
                         </div>
                       )}
                       {lead.category && (
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-                            <Briefcase className="h-6 w-6 text-gray-600" />
+                        <div className="flex items-center gap-macos-sm">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full glass-bg-accent backdrop-filter backdrop-blur-md border glass-border">
+                            <Briefcase className="h-5 w-5 glass-text-secondary" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-normal text-primary">Industry</h3>
-                            <p className="text-secondary font-normal">{lead.category}</p>
+                            <h3 className="text-headline glass-text-primary">Industry</h3>
+                            <p className="text-body glass-text-secondary">{lead.category}</p>
                           </div>
                         </div>
                       )}
@@ -265,125 +280,113 @@ const LeadDetailPage = () => {
               </CardContent>
             </Card>
             {/* Lead Analysis */}
-            <Card className="border-0 shadow-none bg-card">
-              <CardContent className="p-8">
-                <div className="mb-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-100">
-                      <Brain className="h-5 w-5 text-rose-600" />
+            <Card className="card-glass backdrop-blur-4xl glass-shadow-strong relative depth-front">
+              <CardContent className="p-macos-lg">
+                <div className="mb-macos-lg">
+                  <div className="flex items-center gap-macos-sm mb-macos-sm">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full glass-icon-container glass-bg-accent backdrop-blur-4xl border glass-border glass-shadow-medium">
+                      <Brain className="h-5 w-5 glass-text-secondary" />
                     </div>
-                    <h2 className="text-2xl font-normal text-primary">Lead Analisys</h2>
+                    <h2 className="text-title2 glass-text-primary ultra-sharp">Lead Analysis</h2>
                   </div>
-                  <p className="text-secondary font-normal">
-                    {lead.analysis.map((analysis)=>{
+                  <div className="text-body glass-text-secondary">
+                    {lead.analysis.map((analysis, index)=>{
                       return (
-                        <ul key={analysis.id}>
+                        <ul key={index} className="list-disc list-inside space-y-1">
                           <li>{analysis}</li>
                         </ul>
                       )
                     })}
-                  </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-          <div className="space-y-8">
+          <div className="space-y-macos-lg relative depth-mid-front">
             {/* Performance metrics  */}
-            <Card className="border-0 shadow-none bg-card">
-              <CardContent className="p-8">
-               <p className="text-2xl font-normal text-primary mb-4">Performance metrics</p>
-               <div className="flex items-center gap-4 mb-6">
-               <div className="space-y-2">
-               <p className="font-normal">Cumulative Layout Shift</p>
-                <div className="flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  <p className="font-normal">CLS: {parseFloat(lead.metrics?.cls || 0).toFixed(2)}/1</p>
+            <Card className="card-glass backdrop-blur-5xl glass-shadow-strong relative depth-far-front">
+              <CardContent className="p-macos-lg">
+               <h3 className="text-title2 glass-text-primary mb-macos-sm ultra-sharp">Performance Metrics</h3>
+               <div className="space-y-macos-sm">
+                <div className="flex items-center justify-between py-3 border-b glass-border backdrop-blur-xl">
+                  <div className="flex items-center gap-2">
+                    <Eye className="h-4 w-4 glass-text-secondary" />
+                    <span className="text-subheadline glass-text-secondary">Cumulative Layout Shift</span>
+                  </div>
+                  <span className="text-callout glass-text-primary font-medium">{parseFloat(lead.metrics?.cls || 0).toFixed(2)}/1</span>
                 </div>
-                <p className="font-normal">First Contentful Paint</p>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <p className="font-normal">FCP: {parseFloat(lead.metrics?.fcp || 0).toFixed(2)} Sec</p>
+                <div className="flex items-center justify-between py-3 border-b glass-border backdrop-blur-xl">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 glass-text-secondary" />
+                    <span className="text-subheadline glass-text-secondary">First Contentful Paint</span>
+                  </div>
+                  <span className="text-callout glass-text-primary font-medium">{parseFloat(lead.metrics?.fcp || 0).toFixed(2)}s</span>
                 </div>
-                <p className="font-normal">Largest Contentful Paint</p>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <p className="font-normal">LCP: {parseFloat(lead.metrics?.lcp || 0).toFixed(2)} Sec</p>
+                <div className="flex items-center justify-between py-3 border-b glass-border backdrop-blur-xl">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 glass-text-secondary" />
+                    <span className="text-subheadline glass-text-secondary">Largest Contentful Paint</span>
+                  </div>
+                  <span className="text-callout glass-text-primary font-medium">{parseFloat(lead.metrics?.lcp || 0).toFixed(2)}s</span>
                 </div>
-                <p className="font-normal">Total Blocking Time</p>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <p className="font-normal">TBT: {parseFloat(lead.metrics?.tbt || 0).toFixed(2)} ms</p>
+                <div className="flex items-center justify-between py-3 border-b glass-border backdrop-blur-xl">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 glass-text-secondary" />
+                    <span className="text-subheadline glass-text-secondary">Total Blocking Time</span>
+                  </div>
+                  <span className="text-callout glass-text-primary font-medium">{parseFloat(lead.metrics?.tbt || 0).toFixed(2)}ms</span>
                 </div>
-                <p className="font-normal">Time to Interactive</p>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <p className="font-normal">TTI: {parseFloat(lead.metrics?.tti || 0).toFixed(2)} Sec</p>
+                <div className="flex items-center justify-between py-3">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 glass-text-secondary" />
+                    <span className="text-subheadline glass-text-secondary">Time to Interactive</span>
+                  </div>
+                  <span className="text-callout glass-text-primary font-medium">{parseFloat(lead.metrics?.tti || 0).toFixed(2)}s</span>
                 </div>
-               </div>
-
                </div>
               </CardContent>
             </Card>
 
             {/* Evaluation Analysis */}
-            <Card className="border-0 shadow-none bg-card">
-              <CardContent className="p-8">
-                <div className="mb-6">
-                  <h3 className="text-xl font-normal text-primary mb-2">SEO Score</h3>
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="text-4xl font-bold text-primary">{lead.metrics?.seo_score || 0}/100</div>
-                    <div className="flex-1 bg-gray-200 h-3 rounded-full overflow-hidden">
+            <Card className="card-glass backdrop-blur-5xl glass-shadow-strong relative depth-far-front glass-glow">
+              <CardContent className="p-macos-lg">
+                <div className="mb-macos-md">
+                  <h3 className="text-title2 glass-text-primary mb-macos-sm ultra-sharp">SEO Score</h3>
+                  <div className="flex items-center gap-macos-sm mb-macos-md">
+                    <div className="text-largetitle glass-text-primary font-bold">{lead.metrics?.seo_score || 0}<span className="text-title3 glass-text-secondary">/100</span></div>
+                    <div className="flex-1 glass-bg-secondary backdrop-blur-xl" style={{height: '8px', borderRadius: '12px', overflow: 'hidden'}}>
                       <div 
-                        className="bg-gradient-to-r from-red-500 to-yellow-500  to-green-300 to-green-500 h-full rounded-full transition-all duration-300"
-                        style={{ width: `${lead.metrics?.seo_score || 0}%` }}
+                        className="h-full rounded-xl transition-all duration-500 ease-out backdrop-filter backdrop-blur-md"
+                        style={{ 
+                          background: lead.metrics?.seo_score >= 80 ? 'linear-gradient(90deg, var(--glass-green), rgba(34, 197, 94, 0.8))' : lead.metrics?.seo_score >= 60 ? 'linear-gradient(90deg, var(--glass-orange), rgba(249, 115, 22, 0.8))' : 'linear-gradient(90deg, var(--glass-red), rgba(239, 68, 68, 0.8))',
+                          width: `${lead.metrics?.seo_score || 0}%`,
+                          boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)'
+                        }}
                       ></div>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  {/* SEO Score */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-primary">Performance Score</span>
-                    <span className="text-sm font-medium text-green-600">{lead.metrics?.performance_score || 0}/100</span>
+                <div className="space-y-macos-sm">
+                  <div className="flex items-center justify-between py-3 border-b glass-border backdrop-blur-xl">
+                    <span className="text-subheadline glass-text-secondary">Performance Score</span>
+                    <span className="text-callout glass-text-primary font-medium">{lead.metrics?.performance_score || 0}/100</span>
                   </div>
-                  <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                    <div className="bg-green-500 h-full rounded-full" style={{ width: `${lead.metrics?.performance_score || 0}%` }}></div>
+                  <div className="flex items-center justify-between py-3 border-b glass-border backdrop-blur-xl">
+                    <span className="text-subheadline glass-text-secondary">Accessibility Score</span>
+                    <span className="text-callout glass-text-primary font-medium">{lead.metrics?.accessibility_score || 0}/100</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-primary">Accessibility Score</span>
-                    <span className="text-sm font-medium text-yellow-600">{lead.metrics?.accessibility_score || 0}/100</span>
-                  </div>
-                  <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                    <div className="bg-yellow-500 h-full rounded-full" style={{ width: `${lead.metrics?.accessibility_score || 0}%` }}></div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-primary">Best practices Score</span>
-                    <span className="text-sm font-medium text-red-600">{lead.metrics?.best_practices_score || 0}/100</span>
-                  </div>
-                  <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                    <div className="bg-red-500 h-full rounded-full" style={{ width: `${lead.metrics?.best_practices_score || 0}%` }}></div>
+                  <div className="flex items-center justify-between py-3">
+                    <span className="text-subheadline glass-text-secondary">Best Practices Score</span>
+                    <span className="text-callout glass-text-primary font-medium">{lead.metrics?.best_practices_score || 0}/100</span>
                   </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <p className="text-xs text-secondary">
+                <div className="mt-macos-md pt-macos-sm border-t glass-border backdrop-blur-xl">
+                  <p className="text-footnote glass-text-tertiary">
                     SEO score based on local search optimization factors. Higher scores indicate better local visibility.
                   </p>
                 </div>
-              </CardContent>
-            </Card>
-            <Card className="border-0 shadow-none bg-card">
-              <CardContent className="p-8">
-                {lead.in_zoho_crm == true ? (
-                  <Button className="bg-black hover:bg-gray-800 text-white font-normal rounded-none" onClick={zoho_remove_lead}>
-                    <p>Remove from Zoho</p>
-                  </Button>
-                ) : (
-                  <Button className="bg-black hover:bg-gray-800 text-white font-normal rounded-none" onClick={zoho_insert_lead}>
-                    <p>Add to Zoho</p>
-                  </Button>
-                )}
               </CardContent>
             </Card>
           </div>
